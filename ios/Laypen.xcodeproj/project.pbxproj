@@ -1,0 +1,584 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		00512994770D36A16533AAC8 /* ShareHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */; };
+		05E69482E44BD8470241CE1B /* WhiteRectShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FC3C8B5BB25B30825F2304 /* WhiteRectShape.swift */; };
+		06A3B9A55BAE8941BAF53C35 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190B600ED372BCF3D974E84A /* ContentView.swift */; };
+		09AA4D3AFAD5800D28D7E12D /* ShortcutsGuideSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */; };
+		0C394AEFB5A60070A4DE3C21 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF0890947E173A5151615D1 /* SessionStore.swift */; };
+		19C030A073ABBD313A71522D /* ToolSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */; };
+		1AF281A69D7443BD8C9D5D26 /* LineBoardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0747887D96118373EBE974B7 /* LineBoardLayer.swift */; };
+		2D8F611CC3186D7A42CF4D88 /* EdgeSnappingDraggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */; };
+		36AD9179A99E38738E56B2C1 /* StrokeStraightener.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */; };
+		3A58CCFA864AFF9B8FF7589C /* DrawingCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E35FE93494FEC32998312B /* DrawingCanvasView.swift */; };
+		3C5BC818D5A9CD7C24717529 /* AnnotationExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2059746C151860ABE2A40C /* AnnotationExporter.swift */; };
+		3D6C3A63DA2D986ABAD3CEF4 /* WhiteRectShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FC3C8B5BB25B30825F2304 /* WhiteRectShape.swift */; };
+		3FCC453ACAD03875FFF70AC3 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90088A744553C80895817A1 /* ShareSheet.swift */; };
+		45206BDC84F97C993815510E /* ToolSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */; };
+		482E677833FE08F2E76E81E9 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF0890947E173A5151615D1 /* SessionStore.swift */; };
+		6084D216832FD74002E0DEAD /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBCCE3839FF2F5F6BBB4FB /* AppGroup.swift */; };
+		649474C4B2968E6BCFC2C3E2 /* ShareHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */; };
+		64D95DCABEE64E2A246F66F7 /* ShortcutsGuideSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */; };
+		67AE8B01CFAF17085C1E5861 /* ToolSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */; };
+		6C6C4EA9D285A3C50DA0C5C0 /* FloatingToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */; };
+		6DF605C83C895638AE50C986 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978DCDCA55AA604E091A760 /* ShareViewController.swift */; };
+		80403041B7B728E06311C34A /* FloatingToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */; };
+		81D8319FC83D90E8C3B44B4C /* DrawingCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E35FE93494FEC32998312B /* DrawingCanvasView.swift */; };
+		85EB479E4A7502FCDD44E624 /* AnnotationExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2059746C151860ABE2A40C /* AnnotationExporter.swift */; };
+		87BF9CE4EE0C16409A350454 /* BackgroundSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */; };
+		97E1A6DC72C6A13E4F5B4E55 /* LaypenShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C140FA12DB53D7C1F014BE16 /* LaypenShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A23093753ABC1385D097C58D /* LineBoardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0747887D96118373EBE974B7 /* LineBoardLayer.swift */; };
+		A4AFD37440D9EE17560F379A /* ToolSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */; };
+		A7C56A4B3F7D464DB5736E5E /* LineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EFC8B44FA8BC546E7C9A7E5 /* LineStore.swift */; };
+		ACF96BBEE3AE1CEEA395D7F8 /* LineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EFC8B44FA8BC546E7C9A7E5 /* LineStore.swift */; };
+		AD042B1D9DD100F57D70987D /* ShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A5B660FFFBE5816A04D41B /* ShapeStore.swift */; };
+		ADB23C5DE38EF29EAA5CEF7F /* DrawingSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */; };
+		AE1FF796DA9B4DF25923C95C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2EDDF40D347793170D3E2972 /* Assets.xcassets */; };
+		AEB2359DBDD7D750289BFA2A /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90088A744553C80895817A1 /* ShareSheet.swift */; };
+		B2DF4687172A2BCE83DFE55E /* WhiteboardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55490695088C3B2A1031A58F /* WhiteboardLayer.swift */; };
+		B7BA8DBB1BDB4BA2287745DC /* BackgroundSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */; };
+		B9326DC7379E5B7574671B37 /* LineShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = F507F5ED2CF5B9CE4568E860 /* LineShape.swift */; };
+		B9C0BB0CF3EC717EE65F3B45 /* CanvasViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */; };
+		BEC605771B7BB8EEC793EE39 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBCCE3839FF2F5F6BBB4FB /* AppGroup.swift */; };
+		BF135145B33146CE0DDE405B /* ColorContrast.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4AEBCDB3976B6FEDBF168 /* ColorContrast.swift */; };
+		C906DC415EAE838C73221C57 /* ShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A5B660FFFBE5816A04D41B /* ShapeStore.swift */; };
+		C9C39C9D9E337331C7DAEB43 /* StrokeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CD837D5E28F2536CB39C45 /* StrokeStore.swift */; };
+		C9E3689CE362970179ADFB28 /* StrokeStraightener.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */; };
+		CEA83171DBA4DBE4AA047A48 /* ColorContrast.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4AEBCDB3976B6FEDBF168 /* ColorContrast.swift */; };
+		DD8F837A7AB086EC865E34FC /* CanvasViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */; };
+		DF160802D171A00CD6CEA2DB /* WhiteboardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55490695088C3B2A1031A58F /* WhiteboardLayer.swift */; };
+		E1B356FBB835C6A66D68D569 /* LineShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = F507F5ED2CF5B9CE4568E860 /* LineShape.swift */; };
+		F0833B67DFFB832CECC9732E /* DrawingSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */; };
+		F2A81C45598A9FB03983C9C3 /* LaypenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A25651C25BB42D786DD2EC79 /* LaypenApp.swift */; };
+		F5C3CB0C36ABED6A0B4C654A /* EdgeSnappingDraggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */; };
+		F8C590F4F3E71A92551E54CB /* StrokeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CD837D5E28F2536CB39C45 /* StrokeStore.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		3F26B2D2EA636437236DF1E5 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 368769B238B135B5AF6E3F2B /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = F2C05CF59ED493C2197727D8;
+			remoteInfo = LaypenShare;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		AF68E6E0C0766634E8CEF166 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				97E1A6DC72C6A13E4F5B4E55 /* LaypenShare.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		0747887D96118373EBE974B7 /* LineBoardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineBoardLayer.swift; sourceTree = "<group>"; };
+		0ECBCCE3839FF2F5F6BBB4FB /* AppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroup.swift; sourceTree = "<group>"; };
+		148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingToolbar.swift; sourceTree = "<group>"; };
+		190B600ED372BCF3D974E84A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		24FC3C8B5BB25B30825F2304 /* WhiteRectShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteRectShape.swift; sourceTree = "<group>"; };
+		2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHandoff.swift; sourceTree = "<group>"; };
+		2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdgeSnappingDraggable.swift; sourceTree = "<group>"; };
+		2EDDF40D347793170D3E2972 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolSettingsStore.swift; sourceTree = "<group>"; };
+		4978DCDCA55AA604E091A760 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		55490695088C3B2A1031A58F /* WhiteboardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardLayer.swift; sourceTree = "<group>"; };
+		57A5B660FFFBE5816A04D41B /* ShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeStore.swift; sourceTree = "<group>"; };
+		5EFC8B44FA8BC546E7C9A7E5 /* LineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineStore.swift; sourceTree = "<group>"; };
+		8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSource.swift; sourceTree = "<group>"; };
+		8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewport.swift; sourceTree = "<group>"; };
+		96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsGuideSheet.swift; sourceTree = "<group>"; };
+		9FF0890947E173A5151615D1 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		A25651C25BB42D786DD2EC79 /* LaypenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaypenApp.swift; sourceTree = "<group>"; };
+		ACC877A0926C1D6C9FF58435 /* Laypen.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Laypen.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolSettings.swift; sourceTree = "<group>"; };
+		BF2059746C151860ABE2A40C /* AnnotationExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationExporter.swift; sourceTree = "<group>"; };
+		C140FA12DB53D7C1F014BE16 /* LaypenShare.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = LaypenShare.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		C90088A744553C80895817A1 /* ShareSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareSheet.swift; sourceTree = "<group>"; };
+		CCD4AEBCDB3976B6FEDBF168 /* ColorContrast.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ColorContrast.swift; sourceTree = "<group>"; };
+		D7CD837D5E28F2536CB39C45 /* StrokeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrokeStore.swift; sourceTree = "<group>"; };
+		DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingSessionModel.swift; sourceTree = "<group>"; };
+		E1E35FE93494FEC32998312B /* DrawingCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCanvasView.swift; sourceTree = "<group>"; };
+		E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrokeStraightener.swift; sourceTree = "<group>"; };
+		F507F5ED2CF5B9CE4568E860 /* LineShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineShape.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXGroup section */
+		2B55FED7B58F999612D2CE76 /* LaypenShare */ = {
+			isa = PBXGroup;
+			children = (
+				4978DCDCA55AA604E091A760 /* ShareViewController.swift */,
+			);
+			path = LaypenShare;
+			sourceTree = "<group>";
+		};
+		3E70043D566F2CF2A1EC3ECB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				ACC877A0926C1D6C9FF58435 /* Laypen.app */,
+				C140FA12DB53D7C1F014BE16 /* LaypenShare.appex */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		EB99D3F7229081E4223E14A9 /* Shared */ = {
+			isa = PBXGroup;
+			children = (
+				BF2059746C151860ABE2A40C /* AnnotationExporter.swift */,
+				0ECBCCE3839FF2F5F6BBB4FB /* AppGroup.swift */,
+				8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */,
+				8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */,
+				CCD4AEBCDB3976B6FEDBF168 /* ColorContrast.swift */,
+				E1E35FE93494FEC32998312B /* DrawingCanvasView.swift */,
+				DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */,
+				2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */,
+				148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */,
+				0747887D96118373EBE974B7 /* LineBoardLayer.swift */,
+				F507F5ED2CF5B9CE4568E860 /* LineShape.swift */,
+				5EFC8B44FA8BC546E7C9A7E5 /* LineStore.swift */,
+				9FF0890947E173A5151615D1 /* SessionStore.swift */,
+				57A5B660FFFBE5816A04D41B /* ShapeStore.swift */,
+				2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */,
+				C90088A744553C80895817A1 /* ShareSheet.swift */,
+				96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */,
+				D7CD837D5E28F2536CB39C45 /* StrokeStore.swift */,
+				E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */,
+				BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */,
+				2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */,
+				55490695088C3B2A1031A58F /* WhiteboardLayer.swift */,
+				24FC3C8B5BB25B30825F2304 /* WhiteRectShape.swift */,
+			);
+			path = Shared;
+			sourceTree = "<group>";
+		};
+		ECC410389BFD48551FE75F15 /* Laypen */ = {
+			isa = PBXGroup;
+			children = (
+				2EDDF40D347793170D3E2972 /* Assets.xcassets */,
+				190B600ED372BCF3D974E84A /* ContentView.swift */,
+				A25651C25BB42D786DD2EC79 /* LaypenApp.swift */,
+			);
+			path = Laypen;
+			sourceTree = "<group>";
+		};
+		F47A1CB0CF87312F2DF49EC8 = {
+			isa = PBXGroup;
+			children = (
+				ECC410389BFD48551FE75F15 /* Laypen */,
+				2B55FED7B58F999612D2CE76 /* LaypenShare */,
+				EB99D3F7229081E4223E14A9 /* Shared */,
+				3E70043D566F2CF2A1EC3ECB /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		0EDA36CCCE44D42B93D3AA2D /* Laypen */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 97FB0DC8580C59019CEA4BFE /* Build configuration list for PBXNativeTarget "Laypen" */;
+			buildPhases = (
+				F1FA759D15EE14C2BAC2B26A /* Sources */,
+				1307A7C0E0484741C4B2D3E8 /* Resources */,
+				AF68E6E0C0766634E8CEF166 /* Embed Foundation Extensions */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FCD95715A26C01778C71FF78 /* PBXTargetDependency */,
+			);
+			name = Laypen;
+			packageProductDependencies = (
+			);
+			productName = Laypen;
+			productReference = ACC877A0926C1D6C9FF58435 /* Laypen.app */;
+			productType = "com.apple.product-type.application";
+		};
+		F2C05CF59ED493C2197727D8 /* LaypenShare */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B798491853EC43107E8278F /* Build configuration list for PBXNativeTarget "LaypenShare" */;
+			buildPhases = (
+				714BDC8A1A21E7472D367ED2 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LaypenShare;
+			packageProductDependencies = (
+			);
+			productName = LaypenShare;
+			productReference = C140FA12DB53D7C1F014BE16 /* LaypenShare.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		368769B238B135B5AF6E3F2B /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					0EDA36CCCE44D42B93D3AA2D = {
+						DevelopmentTeam = PW795XA9ST;
+						ProvisioningStyle = Automatic;
+					};
+					F2C05CF59ED493C2197727D8 = {
+						DevelopmentTeam = PW795XA9ST;
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 62A5E165DC919D274CDF7E4D /* Build configuration list for PBXProject "Laypen" */;
+			developmentRegion = ko;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				ko,
+			);
+			mainGroup = F47A1CB0CF87312F2DF49EC8;
+			minimizedProjectReferenceProxies = 1;
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 3E70043D566F2CF2A1EC3ECB /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				0EDA36CCCE44D42B93D3AA2D /* Laypen */,
+				F2C05CF59ED493C2197727D8 /* LaypenShare */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		1307A7C0E0484741C4B2D3E8 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AE1FF796DA9B4DF25923C95C /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		714BDC8A1A21E7472D367ED2 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				85EB479E4A7502FCDD44E624 /* AnnotationExporter.swift in Sources */,
+				6084D216832FD74002E0DEAD /* AppGroup.swift in Sources */,
+				B7BA8DBB1BDB4BA2287745DC /* BackgroundSource.swift in Sources */,
+				B9C0BB0CF3EC717EE65F3B45 /* CanvasViewport.swift in Sources */,
+				CEA83171DBA4DBE4AA047A48 /* ColorContrast.swift in Sources */,
+				3A58CCFA864AFF9B8FF7589C /* DrawingCanvasView.swift in Sources */,
+				F0833B67DFFB832CECC9732E /* DrawingSessionModel.swift in Sources */,
+				2D8F611CC3186D7A42CF4D88 /* EdgeSnappingDraggable.swift in Sources */,
+				6C6C4EA9D285A3C50DA0C5C0 /* FloatingToolbar.swift in Sources */,
+				A23093753ABC1385D097C58D /* LineBoardLayer.swift in Sources */,
+				B9326DC7379E5B7574671B37 /* LineShape.swift in Sources */,
+				ACF96BBEE3AE1CEEA395D7F8 /* LineStore.swift in Sources */,
+				0C394AEFB5A60070A4DE3C21 /* SessionStore.swift in Sources */,
+				C906DC415EAE838C73221C57 /* ShapeStore.swift in Sources */,
+				649474C4B2968E6BCFC2C3E2 /* ShareHandoff.swift in Sources */,
+				AEB2359DBDD7D750289BFA2A /* ShareSheet.swift in Sources */,
+				6DF605C83C895638AE50C986 /* ShareViewController.swift in Sources */,
+				09AA4D3AFAD5800D28D7E12D /* ShortcutsGuideSheet.swift in Sources */,
+				C9C39C9D9E337331C7DAEB43 /* StrokeStore.swift in Sources */,
+				36AD9179A99E38738E56B2C1 /* StrokeStraightener.swift in Sources */,
+				67AE8B01CFAF17085C1E5861 /* ToolSettings.swift in Sources */,
+				19C030A073ABBD313A71522D /* ToolSettingsStore.swift in Sources */,
+				05E69482E44BD8470241CE1B /* WhiteRectShape.swift in Sources */,
+				B2DF4687172A2BCE83DFE55E /* WhiteboardLayer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		F1FA759D15EE14C2BAC2B26A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				3C5BC818D5A9CD7C24717529 /* AnnotationExporter.swift in Sources */,
+				BEC605771B7BB8EEC793EE39 /* AppGroup.swift in Sources */,
+				87BF9CE4EE0C16409A350454 /* BackgroundSource.swift in Sources */,
+				DD8F837A7AB086EC865E34FC /* CanvasViewport.swift in Sources */,
+				BF135145B33146CE0DDE405B /* ColorContrast.swift in Sources */,
+				06A3B9A55BAE8941BAF53C35 /* ContentView.swift in Sources */,
+				81D8319FC83D90E8C3B44B4C /* DrawingCanvasView.swift in Sources */,
+				ADB23C5DE38EF29EAA5CEF7F /* DrawingSessionModel.swift in Sources */,
+				F5C3CB0C36ABED6A0B4C654A /* EdgeSnappingDraggable.swift in Sources */,
+				80403041B7B728E06311C34A /* FloatingToolbar.swift in Sources */,
+				F2A81C45598A9FB03983C9C3 /* LaypenApp.swift in Sources */,
+				1AF281A69D7443BD8C9D5D26 /* LineBoardLayer.swift in Sources */,
+				E1B356FBB835C6A66D68D569 /* LineShape.swift in Sources */,
+				A7C56A4B3F7D464DB5736E5E /* LineStore.swift in Sources */,
+				482E677833FE08F2E76E81E9 /* SessionStore.swift in Sources */,
+				AD042B1D9DD100F57D70987D /* ShapeStore.swift in Sources */,
+				00512994770D36A16533AAC8 /* ShareHandoff.swift in Sources */,
+				3FCC453ACAD03875FFF70AC3 /* ShareSheet.swift in Sources */,
+				64D95DCABEE64E2A246F66F7 /* ShortcutsGuideSheet.swift in Sources */,
+				F8C590F4F3E71A92551E54CB /* StrokeStore.swift in Sources */,
+				C9E3689CE362970179ADFB28 /* StrokeStraightener.swift in Sources */,
+				45206BDC84F97C993815510E /* ToolSettings.swift in Sources */,
+				A4AFD37440D9EE17560F379A /* ToolSettingsStore.swift in Sources */,
+				3D6C3A63DA2D986ABAD3CEF4 /* WhiteRectShape.swift in Sources */,
+				DF160802D171A00CD6CEA2DB /* WhiteboardLayer.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		FCD95715A26C01778C71FF78 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = F2C05CF59ED493C2197727D8 /* LaypenShare */;
+			targetProxy = 3F26B2D2EA636437236DF1E5 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		220D9EE3BC0064228EB26EC2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LaypenShare/LaypenShare.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LaypenShare/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.app.share;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		3DAD9CC33A8D33E22EA3D2C5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BASE_SDK = iphoneos;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				DEVELOPMENT_TEAM = PW795XA9ST;
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Release;
+		};
+		51BB98A3021AE850941D0CA3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Laypen/Laypen.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Laypen/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.app;
+				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		529B3808DAC9A1FF5E646559 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Laypen/Laypen.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Laypen/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.app;
+				SDKROOT = iphoneos;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Release;
+		};
+		733D0E225015A1B4A02F5DAF /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				BASE_SDK = iphoneos;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				CODE_SIGN_STYLE = Automatic;
+				COPY_PHASE_STRIP = NO;
+				CURRENT_PROJECT_VERSION = 1;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				DEVELOPMENT_TEAM = PW795XA9ST;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MARKETING_VERSION = 0.1.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Debug;
+		};
+		AF5DF98DA1CC4113347D609D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = LaypenShare/LaypenShare.entitlements;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = LaypenShare/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.app.share;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 2;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1B798491853EC43107E8278F /* Build configuration list for PBXNativeTarget "LaypenShare" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				220D9EE3BC0064228EB26EC2 /* Debug */,
+				AF5DF98DA1CC4113347D609D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		62A5E165DC919D274CDF7E4D /* Build configuration list for PBXProject "Laypen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				733D0E225015A1B4A02F5DAF /* Debug */,
+				3DAD9CC33A8D33E22EA3D2C5 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		97FB0DC8580C59019CEA4BFE /* Build configuration list for PBXNativeTarget "Laypen" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				51BB98A3021AE850941D0CA3 /* Debug */,
+				529B3808DAC9A1FF5E646559 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 368769B238B135B5AF6E3F2B /* Project object */;
+}
