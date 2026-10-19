@@ -109,6 +109,7 @@ private struct ShareDrawingView: View {
                     canUndo: $model.canUndo,
                     canRedo: $model.canRedo,
                     viewport: $model.viewport,
+                    layoutAnchorSize: model.layoutAnchorSize,
                     tool: model.currentTool,
                     isDrawingEnabled: model.settings.isDrawingEnabled,
                     allowsFingerDrawing: model.settings.allowsFingerDrawing,
@@ -117,11 +118,11 @@ private struct ShareDrawingView: View {
                     onShapesChanged: { model.persist() },
                     onLinesChanged: { model.persist() },
                     onWhiteRectPlacementFinished: { model.endWhiteRectPlacement() },
-                    onCanvasSizeChange: { model.canvasSize = $0 }
+                    onCanvasSizeChange: { model.noteCanvasSize($0) }
                 )
                 .ignoresSafeArea(edges: .bottom)
 
-                EdgeSnappingDraggable {
+                EdgeSnappingDraggable { maxHeight in
                     FloatingToolbar(
                         settings: $model.settings,
                         isMenuOpen: $model.isMenuOpen,
@@ -141,7 +142,8 @@ private struct ShareDrawingView: View {
                         },
                         onExportShare: {
                             Task { await model.prepareShare() }
-                        }
+                        },
+                        availableHeight: maxHeight
                     )
                 }
             }

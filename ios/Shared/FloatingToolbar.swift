@@ -18,55 +18,215 @@ struct FloatingToolbar: View {
     var onAddWhiteRect: () -> Void
     var onSavePhoto: () -> Void
     var onExportShare: () -> Void
+    /// EdgeSnappingDraggable가 넘기는 가용 높이. 접기 버튼이 잘리지 않게 메뉴 높이를 제한한다.
+    var availableHeight: CGFloat = 600
 
     private let palette = ["#E53935", "#1E88E5", "#43A047", "#FB8C00", "#8E24AA", "#111111"]
-    private let buttonSide: CGFloat = 34
+    private let buttonSide: CGFloat = 30
+    private let menuWidth: CGFloat = 200
+    private let chromeHeight: CGFloat = 52
     @State private var didCopyHex = false
     @State private var showShortcutsGuide = false
+    @State private var menuContentHeight: CGFloat = 0
+    @State private var menuViewportHeight: CGFloat = 0
+    @State private var isScrolledNearBottom = false
+    @State private var flashScrollToken = 0
+    /// 페이드만 담당. 레이아웃(폭) 변화는 애니메이션 없이 해서 버튼이 옆으로 안 밀리게 한다.
+    @State private var menuFadedIn = false
+    @State private var menuToggleTask: Task<Void, Never>?
+
+    private var menuMaxHeight: CGFloat {
+        // 접기/ON 크롬 + 패딩을 빼고, Split View에서도 스크롤로 전부 닿게 한다.
+        max(80, min(240, availableHeight - chromeHeight - 16))
+    }
+
+    private var menuNeedsScroll: Bool {
+        menuContentHeight > menuViewportHeight + 4
+    }
+
+    private var showScrollHint: Bool {
+        menuNeedsScroll && !isScrolledNearBottom
+    }
 
     var body: some View {
-        VStack(alignment: .trailing, spacing: 6) {
-            if isMenuOpen {
-                menuPanel
-            }
-
-            HStack(spacing: 6) {
+        VStack(alignment: .trailing, spacing: 4) {
+            // 접기/ON을 위에 고정 — 창이 작아져도 항상 보이게
+            HStack(spacing: 5) {
                 Button {
-                    isMenuOpen.toggle()
+                    toggleMenu()
                 } label: {
                     Image(systemName: "pencil.tip.crop.circle")
-                        .font(.body.weight(.semibold))
+                        .font(.subheadline.weight(.semibold))
                         .frame(width: buttonSide, height: buttonSide)
                 }
                 .buttonStyle(.borderedProminent)
                 .controlSize(.small)
+
+                // 메뉴를 열지 않고 지우개 ↔ 직전 펜 전환
+                Button {
+                    settings.toggleEraserWithLastInk()
+                } label: {
+                    Image(systemName: quickToolSwapSystemImage)
+                        .font(.subheadline.weight(.semibold))
+                        .foregroundStyle(quickToolSwapForeground)
+                        .frame(width: buttonSide, height: buttonSide)
+                        .background(quickToolSwapBackground, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel(settings.isEraserSelected ? "이전 펜으로 전환" : "지우개로 전환")
 
                 Button {
                     settings.isDrawingEnabled.toggle()
                 } label: {
                     HStack(spacing: 3) {
                         Image(systemName: settings.isDrawingEnabled ? "pencil" : "pencil.slash")
-                            .font(.caption.weight(.semibold))
+                            .font(.caption2.weight(.semibold))
                         Text(settings.isDrawingEnabled ? "ON" : "OFF")
                             .font(.caption2.bold())
                     }
                     .foregroundStyle(onOffForeground)
-                    .frame(minWidth: 56, minHeight: buttonSide)
-                    .padding(.horizontal, 6)
-                    .background(onOffBackground, in: RoundedRectangle(cornerRadius: 8, style: .continuous))
+                    .frame(minWidth: 50, minHeight: buttonSide)
+                    .padding(.horizontal, 5)
+                    .background(onOffBackground, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                 }
                 .buttonStyle(.plain)
             }
+
+            if isMenuOpen {
+                menuScrollChrome
+                    .opacity(menuFadedIn ? 1 : 0)
+            }
         }
-        .padding(8)
-        .background(panelBackground, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .padding(6)
+        .background(panelBackground, in: RoundedRectangle(cornerRadius: 10, style: .continuous))
         .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
                 .strokeBorder(Color.primary.opacity(0.12), lineWidth: 1)
         )
+        .onAppear {
+            menuFadedIn = isMenuOpen
+        }
+        .onChange(of: isMenuOpen) { _, open in
+            if open {
+                isScrolledNearBottom = false
+                flashScrollToken &+= 1
+            } else {
+                menuFadedIn = false
+            }
+        }
         .sheet(isPresented: $showShortcutsGuide) {
             ShortcutsGuideSheet()
         }
+    }
+
+    /// 메뉴는 페이드만, 폭·위치 변화는 즉시 — 접기/ON이 좌우로 미끄러지지 않는다.
+    private func toggleMenu() {
+        menuToggleTask?.cancel()
+
+        if isMenuOpen {
+            withAnimation(.easeInOut(duration: 0.18)) {
+                menuFadedIn = false
+            }
+            menuToggleTask = Task { @MainActor in
+                try? await Task.sleep(nanoseconds: 180_000_000)
+                guard !Task.isCancelled else { return }
+                var transaction = Transaction()
+                transaction.disablesAnimations = true
+                withTransaction(transaction) {
+                    isMenuOpen = false
+                }
+            }
+        } else {
+            var transaction = Transaction()
+            transaction.disablesAnimations = true
+            withTransaction(transaction) {
+                isMenuOpen = true
+                menuFadedIn = false
+            }
+            withAnimation(.easeInOut(duration: 0.18)) {
+                menuFadedIn = true
+            }
+        }
+    }
+
+    private var menuScrollChrome: some View {
+        ScrollView {
+            menuPanel
+                .background(
+                    GeometryReader { proxy in
+                        Color.clear.preference(
+                            key: MenuContentHeightKey.self,
+                            value: proxy.size.height
+                        )
+                    }
+                )
+        }
+        .scrollIndicators(.visible)
+        .frame(width: menuWidth)
+        .frame(maxHeight: menuMaxHeight)
+        .background(
+            GeometryReader { proxy in
+                Color.clear
+                    .onAppear { menuViewportHeight = proxy.size.height }
+                    .onChange(of: proxy.size.height) { _, h in menuViewportHeight = h }
+            }
+        )
+        .onPreferenceChange(MenuContentHeightKey.self) { menuContentHeight = $0 }
+        .background(
+            Color(.secondarySystemBackground).opacity(0.97),
+            in: RoundedRectangle(cornerRadius: 10, style: .continuous)
+        )
+        .overlay {
+            ScrollIndicatorFlash(token: flashScrollToken)
+                .allowsHitTesting(false)
+        }
+        .overlay(alignment: .trailing) {
+            if menuNeedsScroll {
+                Capsule()
+                    .fill(Color.primary.opacity(0.22))
+                    .frame(width: 3)
+                    .padding(.vertical, 10)
+                    .padding(.trailing, 4)
+                    .allowsHitTesting(false)
+                    .accessibilityHidden(true)
+            }
+        }
+        .overlay(alignment: .bottom) {
+            if showScrollHint {
+                VStack(spacing: 2) {
+                    LinearGradient(
+                        colors: [
+                            Color(.secondarySystemBackground).opacity(0),
+                            Color(.secondarySystemBackground).opacity(0.92)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                    .frame(height: 28)
+
+                    HStack(spacing: 4) {
+                        Image(systemName: "chevron.compact.down")
+                            .font(.caption.weight(.bold))
+                        Text("더보기")
+                            .font(.caption2.weight(.semibold))
+                    }
+                    .foregroundStyle(.secondary)
+                    .padding(.bottom, 6)
+                }
+                .frame(maxWidth: .infinity)
+                .allowsHitTesting(false)
+                .transition(.opacity)
+            }
+        }
+        .overlay(
+            RoundedRectangle(cornerRadius: 10, style: .continuous)
+                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
+        )
+        .modifier(MenuScrollBottomTracker { nearBottom in
+            isScrolledNearBottom = nearBottom
+        })
+        .animation(.easeOut(duration: 0.18), value: showScrollHint)
+        .accessibilityHint(menuNeedsScroll ? "아래로 스크롤하면 더 많은 도구가 있습니다" : "")
     }
 
     private var panelBackground: some ShapeStyle {
@@ -89,15 +249,39 @@ struct FloatingToolbar: View {
         onOffBackground.contrastingForeground
     }
 
+    /// 탭하면 전환될 도구 아이콘 (지우개일 땐 직전 펜, 펜일 땐 지우개)
+    private var quickToolSwapSystemImage: String {
+        if settings.isEraserSelected {
+            return settings.resolvedLastInkTool.systemImage
+        }
+        return DrawingToolKind.eraser.systemImage
+    }
+
+    private var quickToolSwapBackground: Color {
+        if settings.isEraserSelected {
+            switch settings.resolvedLastInkTool {
+            case .blackPen: return .solidBlack
+            case .colorPen: return Color(hex: settings.colorPenColorHex)
+            case .highlighter: return Color(hex: settings.highlighterColorHex)
+            case .eraser: return Color.gray.opacity(0.85)
+            }
+        }
+        return Color.gray.opacity(0.85)
+    }
+
+    private var quickToolSwapForeground: Color {
+        quickToolSwapBackground.contrastingForeground
+    }
+
     private var menuPanel: some View {
-        VStack(alignment: .leading, spacing: 12) {
-            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 8) {
+        VStack(alignment: .leading, spacing: 8) {
+            LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 6) {
                 ForEach(DrawingToolKind.allCases) { kind in
                     toolCell(kind)
                 }
             }
 
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 inputModeButton(
                     title: "펜만",
                     systemImage: "applepencil",
@@ -121,21 +305,22 @@ struct FloatingToolbar: View {
                 .foregroundStyle(.secondary)
             Slider(
                 value: widthBinding,
-                in: settings.selectedTool == .highlighter || settings.selectedTool == .eraser ? 8...48 : 1...24
+                in: eraserOrHighlighterWidthRange
             )
+            .controlSize(.small)
 
             if settings.selectedTool == .colorPen || settings.selectedTool == .highlighter {
                 Text("색상")
                     .font(.caption2)
                     .foregroundStyle(.secondary)
-                HStack(spacing: 8) {
+                HStack(spacing: 6) {
                     ForEach(palette, id: \.self) { hex in
                         Circle()
                             .fill(Color(hex: hex))
-                            .frame(width: 24, height: 24)
+                            .frame(width: 20, height: 20)
                             .overlay {
                                 if currentColorHex.uppercased() == hex.uppercased() {
-                                    Circle().strokeBorder(Color.primary, lineWidth: 2)
+                                    Circle().strokeBorder(Color.primary, lineWidth: 1.5)
                                 }
                             }
                             .onTapGesture {
@@ -149,14 +334,14 @@ struct FloatingToolbar: View {
                         supportsOpacity: false
                     )
                     .labelsHidden()
-                    .frame(width: 28, height: 28)
+                    .frame(width: 24, height: 24)
                     .accessibilityLabel("스펙트럼에서 색상 선택")
                 }
 
-                HStack(spacing: 6) {
+                HStack(spacing: 5) {
                     Circle()
                         .fill(Color(hex: currentColorHex))
-                        .frame(width: 14, height: 14)
+                        .frame(width: 12, height: 12)
                         .overlay(Circle().strokeBorder(Color.primary.opacity(0.2), lineWidth: 1))
 
                     Text(currentColorHex.uppercased())
@@ -174,9 +359,9 @@ struct FloatingToolbar: View {
                         Image(systemName: didCopyHex ? "checkmark" : "doc.on.doc")
                             .font(.caption2.weight(.semibold))
                             .foregroundStyle(didCopyHex ? Color.accentColor : Color.secondary)
-                            .frame(width: 22, height: 22)
+                            .frame(width: 20, height: 20)
                             .background(
-                                RoundedRectangle(cornerRadius: 6, style: .continuous)
+                                RoundedRectangle(cornerRadius: 5, style: .continuous)
                                     .fill(Color.primary.opacity(0.06))
                             )
                     }
@@ -190,32 +375,26 @@ struct FloatingToolbar: View {
                             .transition(.opacity)
                     }
 
-                    Spacer()
-                    Text("스펙트럼")
-                        .font(.caption2)
-                        .foregroundStyle(.secondary)
+                    Spacer(minLength: 0)
                 }
                 .animation(.easeOut(duration: 0.15), value: didCopyHex)
             }
 
             Divider()
 
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 PhotosPicker(selection: $photoItem, matching: .images) {
-                    Label(
-                        "사진 선택",
-                        systemImage: "photo.on.rectangle"
-                    )
-                    .font(.caption.weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.85)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 6)
-                    .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
-                            .fill(Color.primary.opacity(0.06))
-                    )
+                    Label("사진 선택", systemImage: "photo.on.rectangle")
+                        .font(.caption2.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.primary.opacity(0.06))
+                        )
                 }
                 .buttonStyle(.plain)
 
@@ -224,38 +403,37 @@ struct FloatingToolbar: View {
                         isPlacingWhiteRect ? "크기 지정" : "상자 추가",
                         systemImage: "rectangle.dashed"
                     )
-                    .font(.caption.weight(.semibold))
+                    .font(.caption2.weight(.semibold))
                     .lineLimit(1)
-                    .minimumScaleFactor(0.85)
+                    .minimumScaleFactor(0.8)
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 6)
+                    .padding(.vertical, 8)
+                    .padding(.horizontal, 4)
                     .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(isPlacingWhiteRect ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.06))
                     )
                 }
                 .buttonStyle(.plain)
             }
 
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 Button(action: onSavePhoto) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 4) {
                         if isSavingPhoto {
                             ProgressView()
-                                .controlSize(.small)
+                                .controlSize(.mini)
                         } else {
                             Image(systemName: "square.and.arrow.down")
                         }
-                        Text(isSavingPhoto ? "저장 중…" : "사진으로 저장")
-                            .font(.caption.weight(.semibold))
+                        Text(isSavingPhoto ? "저장 중…" : "사진 저장")
+                            .font(.caption2.weight(.semibold))
                             .lineLimit(1)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 8)
+                    .padding(.vertical, 8)
                     .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(Color.accentColor.opacity(0.16))
                     )
                 }
@@ -263,22 +441,21 @@ struct FloatingToolbar: View {
                 .disabled(isSavingPhoto || isPreparingShare)
 
                 Button(action: onExportShare) {
-                    HStack(spacing: 6) {
+                    HStack(spacing: 4) {
                         if isPreparingShare {
                             ProgressView()
-                                .controlSize(.small)
+                                .controlSize(.mini)
                         } else {
                             Image(systemName: "square.and.arrow.up")
                         }
                         Text(isPreparingShare ? "준비 중…" : "내보내기")
-                            .font(.caption.weight(.semibold))
+                            .font(.caption2.weight(.semibold))
                             .lineLimit(1)
                     }
                     .frame(maxWidth: .infinity)
-                    .padding(.vertical, 10)
-                    .padding(.horizontal, 8)
+                    .padding(.vertical, 8)
                     .background(
-                        RoundedRectangle(cornerRadius: 10, style: .continuous)
+                        RoundedRectangle(cornerRadius: 8, style: .continuous)
                             .fill(Color.primary.opacity(0.08))
                     )
                 }
@@ -286,27 +463,27 @@ struct FloatingToolbar: View {
                 .disabled(isSavingPhoto || isPreparingShare)
             }
 
-            HStack(spacing: 8) {
+            HStack(spacing: 6) {
                 Button(action: onUndo) {
                     Image(systemName: "arrow.uturn.backward")
-                        .font(.body.weight(.semibold))
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(canUndo ? Color.accentColor : Color.secondary.opacity(0.35))
-                        .frame(width: 36, height: 32)
+                        .frame(width: 30, height: 28)
                 }
                 .buttonStyle(.bordered)
-                .controlSize(.small)
+                .controlSize(.mini)
                 .tint(canUndo ? Color.accentColor : Color.secondary.opacity(0.35))
                 .disabled(!canUndo)
                 .accessibilityLabel("실행 취소")
 
                 Button(action: onRedo) {
                     Image(systemName: "arrow.uturn.forward")
-                        .font(.body.weight(.semibold))
+                        .font(.caption.weight(.semibold))
                         .foregroundStyle(canRedo ? Color.accentColor : Color.secondary.opacity(0.35))
-                        .frame(width: 36, height: 32)
+                        .frame(width: 30, height: 28)
                 }
                 .buttonStyle(.bordered)
-                .controlSize(.small)
+                .controlSize(.mini)
                 .tint(canRedo ? Color.accentColor : Color.secondary.opacity(0.35))
                 .disabled(!canRedo)
                 .accessibilityLabel("다시 실행")
@@ -315,10 +492,11 @@ struct FloatingToolbar: View {
 
                 Button(role: .destructive, action: onClearAll) {
                     Image(systemName: "trash")
-                        .frame(width: 36, height: 32)
+                        .font(.caption.weight(.semibold))
+                        .frame(width: 30, height: 28)
                 }
                 .buttonStyle(.bordered)
-                .controlSize(.small)
+                .controlSize(.mini)
             }
 
             Divider()
@@ -327,21 +505,14 @@ struct FloatingToolbar: View {
                 showShortcutsGuide = true
             } label: {
                 Label("단축어로 빠르게 열기", systemImage: "bolt.fill")
-                    .font(.caption.weight(.medium))
+                    .font(.caption2.weight(.medium))
                     .foregroundStyle(.secondary)
                     .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.vertical, 6)
-                    .padding(.horizontal, 8)
+                    .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
         }
-        .padding(12)
-        .frame(width: 248)
-        .background(Color(.secondarySystemBackground).opacity(0.97), in: RoundedRectangle(cornerRadius: 12, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 12, style: .continuous)
-                .strokeBorder(Color.primary.opacity(0.1), lineWidth: 1)
-        )
+        .padding(8)
     }
 
     private func inputModeButton(
@@ -351,23 +522,23 @@ struct FloatingToolbar: View {
         action: @escaping () -> Void
     ) -> some View {
         Button(action: action) {
-            HStack(spacing: 4) {
+            HStack(spacing: 3) {
                 Image(systemName: systemImage)
-                    .font(.caption.weight(.semibold))
+                    .font(.caption2.weight(.semibold))
                 Text(title)
-                    .font(.caption.weight(.semibold))
+                    .font(.caption2.weight(.semibold))
                     .lineLimit(1)
             }
             .frame(maxWidth: .infinity)
-            .padding(.vertical, 8)
-            .padding(.horizontal, 6)
+            .padding(.vertical, 6)
+            .padding(.horizontal, 4)
             .foregroundStyle(selected ? Color.accentColor : Color.primary)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(selected ? Color.accentColor.opacity(0.16) : Color.primary.opacity(0.06))
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .strokeBorder(selected ? Color.accentColor : Color.clear, lineWidth: 1.5)
             )
         }
@@ -381,22 +552,21 @@ struct FloatingToolbar: View {
 
         return Button {
             if kind == .eraser, settings.selectedTool == .eraser {
-                // 이미 선택된 지우개를 다시 탭 → 필기만 삭제
                 onClearInk()
             } else {
-                settings.selectedTool = kind
+                settings.selectTool(kind)
             }
         } label: {
-            VStack(spacing: 6) {
+            VStack(spacing: 4) {
                 ZStack(alignment: .topTrailing) {
                     Image(systemName: kind.systemImage)
-                        .font(.title3)
+                        .font(.body)
                         .foregroundStyle(fg)
                         .frame(maxWidth: .infinity)
 
                     if selected {
                         Image(systemName: "checkmark.circle.fill")
-                            .font(.caption)
+                            .font(.caption2)
                             .foregroundStyle(Color.accentColor)
                             .background(Circle().fill(Color.white).padding(1))
                     }
@@ -405,26 +575,25 @@ struct FloatingToolbar: View {
                     .font(.caption2.weight(.semibold))
                     .foregroundStyle(fg)
             }
-            .frame(maxWidth: .infinity, minHeight: 64)
-            .padding(.horizontal, 4)
+            .frame(maxWidth: .infinity, minHeight: 48)
+            .padding(.horizontal, 2)
             .background(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .fill(fill)
             )
             .overlay(
-                RoundedRectangle(cornerRadius: 10, style: .continuous)
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
                     .strokeBorder(
                         selected ? Color.accentColor : Color.primary.opacity(0.12),
-                        lineWidth: selected ? 3 : 1
+                        lineWidth: selected ? 2 : 1
                     )
             )
-            .shadow(color: selected ? Color.accentColor.opacity(0.35) : .clear, radius: 3, y: 1)
         }
         .buttonStyle(.plain)
         .simultaneousGesture(
             LongPressGesture(minimumDuration: 0.55).onEnded { _ in
                 guard kind == .eraser else { return }
-                settings.selectedTool = .eraser
+                settings.selectTool(.eraser)
                 onClearInk()
             }
         )
@@ -441,6 +610,14 @@ struct FloatingToolbar: View {
             }
         }()
         return selected ? base : base.opacity(0.72)
+    }
+
+    private var eraserOrHighlighterWidthRange: ClosedRange<CGFloat> {
+        switch settings.selectedTool {
+        case .eraser: return 8...96
+        case .highlighter: return 8...48
+        default: return 1...24
+        }
     }
 
     private var widthBinding: Binding<CGFloat> {
@@ -466,6 +643,86 @@ struct FloatingToolbar: View {
             settings.colorPenColorHex = hex
         } else if settings.selectedTool == .highlighter {
             settings.highlighterColorHex = hex
+        }
+    }
+}
+
+private struct MenuContentHeightKey: PreferenceKey {
+    static var defaultValue: CGFloat = 0
+    static func reduce(value: inout CGFloat, nextValue: () -> CGFloat) {
+        value = max(value, nextValue())
+    }
+}
+
+/// 메뉴를 열 때 시스템 스크롤 인디케이터를 한 번 깜빡여 스크롤 가능함을 알린다.
+private struct ScrollIndicatorFlash: UIViewRepresentable {
+    var token: Int
+
+    func makeUIView(context: Context) -> ProbeView {
+        ProbeView()
+    }
+
+    func updateUIView(_ uiView: ProbeView, context: Context) {
+        uiView.flash(token: token)
+    }
+
+    final class ProbeView: UIView {
+        private var lastToken = Int.min
+
+        override init(frame: CGRect) {
+            super.init(frame: frame)
+            isUserInteractionEnabled = false
+            backgroundColor = .clear
+        }
+
+        required init?(coder: NSCoder) {
+            fatalError("init(coder:) has not been implemented")
+        }
+
+        func flash(token: Int) {
+            guard token != lastToken else { return }
+            lastToken = token
+            DispatchQueue.main.async { [weak self] in
+                self?.enclosingScrollView()?.flashScrollIndicators()
+            }
+        }
+
+        private func enclosingScrollView() -> UIScrollView? {
+            var node: UIView? = self
+            while let current = node {
+                if let scroll = current as? UIScrollView {
+                    return scroll
+                }
+                if let parent = current.superview {
+                    for sub in parent.subviews {
+                        if let scroll = sub as? UIScrollView { return scroll }
+                        for child in sub.subviews {
+                            if let scroll = child as? UIScrollView { return scroll }
+                        }
+                    }
+                }
+                node = current.superview
+            }
+            return nil
+        }
+    }
+}
+
+/// 스크롤이 맨 아래에 가까운지 추적해 "더보기" 힌트를 숨긴다.
+private struct MenuScrollBottomTracker: ViewModifier {
+    var onNearBottomChange: (Bool) -> Void
+
+    func body(content: Content) -> some View {
+        if #available(iOS 18.0, *) {
+            content
+                .onScrollGeometryChange(for: Bool.self) { geometry in
+                    let visibleBottom = geometry.contentOffset.y + geometry.containerSize.height
+                    return visibleBottom >= geometry.contentSize.height - 16
+                } action: { _, nearBottom in
+                    onNearBottomChange(nearBottom)
+                }
+        } else {
+            content
         }
     }
 }

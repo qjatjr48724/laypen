@@ -416,6 +416,7 @@ struct AnnotatedCanvas: View {
     @Binding var canUndo: Bool
     @Binding var canRedo: Bool
     @Binding var viewport: CanvasViewport
+    var layoutAnchorSize: CGSize
     var tool: PKTool
     var isDrawingEnabled: Bool
     var allowsFingerDrawing: Bool = true
@@ -428,10 +429,18 @@ struct AnnotatedCanvas: View {
 
     var body: some View {
         GeometryReader { geo in
-            let size = geo.size
+            let viewSize = geo.size
+            let anchor = layoutAnchorSize.width > 1 ? layoutAnchorSize : viewSize
+            let scale: CGFloat = {
+                guard layoutAnchorSize.width > 1, layoutAnchorSize.height > 1,
+                      viewSize.width > 1, viewSize.height > 1 else { return 1 }
+                return min(viewSize.width / layoutAnchorSize.width, viewSize.height / layoutAnchorSize.height)
+            }()
+            // 리사이즈 프리뷰 중에는 좌표가 아직 bake 전이므로 입력은 잠시 막는다.
+            let isLiveResizing = abs(scale - 1) >= 0.012
 
             ZStack {
-                transformedContent(size: size) {
+                transformedContent(size: anchor) {
                     if let backgroundImage {
                         Image(uiImage: backgroundImage)
                             .resizable()
@@ -441,24 +450,23 @@ struct AnnotatedCanvas: View {
                     }
                 }
 
-                transformedContent(size: size) {
+                transformedContent(size: anchor) {
                     WhiteboardLayer(
                         shapes: $shapes,
                         selectedID: $selectedShapeID,
-                        isDrawingEnabled: isDrawingEnabled,
-                        isPlacing: isPlacingWhiteRect,
+                        isDrawingEnabled: isDrawingEnabled && !isLiveResizing,
+                        isPlacing: isPlacingWhiteRect && !isLiveResizing,
                         onPlacementFinished: onWhiteRectPlacementFinished,
                         onShapesChanged: onShapesChanged
                     )
                 }
-                // 상자 배치 중에는 최상단에서 드래그를 받는다.
                 .zIndex(isPlacingWhiteRect ? 3 : (isDrawingEnabled ? 0 : 2))
 
-                transformedContent(size: size) {
+                transformedContent(size: anchor) {
                     LineBoardLayer(
                         lines: $lines,
                         selectedID: $selectedLineID,
-                        isDrawingEnabled: isDrawingEnabled,
+                        isDrawingEnabled: isDrawingEnabled && !isLiveResizing,
                         isPlacing: false,
                         draftColorHex: "#000000",
                         draftWidth: 5,
@@ -466,7 +474,7 @@ struct AnnotatedCanvas: View {
                         onLinesChanged: onLinesChanged
                     )
                 }
-                .allowsHitTesting(!isPlacingWhiteRect)
+                .allowsHitTesting(!isPlacingWhiteRect && !isLiveResizing)
                 .zIndex(isDrawingEnabled && !isPlacingWhiteRect ? 0 : 2)
 
                 DrawingCanvasView(
@@ -475,15 +483,24 @@ struct AnnotatedCanvas: View {
                     canRedo: $canRedo,
                     viewport: $viewport,
                     tool: tool,
-                    isDrawingEnabled: isDrawingEnabled && !isPlacingWhiteRect,
+                    isDrawingEnabled: isDrawingEnabled && !isPlacingWhiteRect && !isLiveResizing,
                     allowsFingerDrawing: allowsFingerDrawing
                 )
-                .allowsHitTesting(!isPlacingWhiteRect)
+                .frame(width: anchor.width, height: anchor.height)
+                .allowsHitTesting(!isPlacingWhiteRect && !isLiveResizing)
                 .zIndex(1)
             }
+            .frame(width: anchor.width, height: anchor.height, alignment: .topLeading)
+            .scaleEffect(scale, anchor: .topLeading)
+            .frame(width: viewSize.width, height: viewSize.height, alignment: .topLeading)
             .clipped()
-            .onAppear { onCanvasSizeChange?(size) }
-            .onChange(of: size) { _, newSize in
+            // Split View 드래그 중에도 비율이 부드럽게 따라가도록
+            .animation(
+                .interactiveSpring(response: 0.32, dampingFraction: 0.92, blendDuration: 0.1),
+                value: scale
+            )
+            .onAppear { onCanvasSizeChange?(viewSize) }
+            .onChange(of: viewSize) { _, newSize in
                 onCanvasSizeChange?(newSize)
             }
         }

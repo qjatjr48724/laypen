@@ -1,5 +1,6 @@
 import Foundation
 import PencilKit
+import SwiftUI
 import UIKit
 
 @MainActor
@@ -16,7 +17,11 @@ final class DrawingSessionModel: ObservableObject {
     @Published var selectedLineID: UUID?
     @Published var isPlacingWhiteRect = false
     @Published var canvasSize: CGSize = .zero
+    /// 필기·상자 좌표가 작성된 기준 크기. 창 리사이즈 중에는 이 크기 기준으로 부드럽게 스케일한다.
+    @Published var layoutAnchorSize: CGSize = .zero
     @Published var viewport = CanvasViewport()
+    private var isScalingLayout = false
+    private var layoutBakeTask: Task<Void, Never>?
     @Published var isSavingPhoto = false
     @Published var isPreparingShare = false
     @Published var saveMessage: String?
@@ -59,6 +64,75 @@ final class DrawingSessionModel: ObservableObject {
         backgroundImage = image
         sessionStore.saveBackground(image)
         viewport.reset()
+    }
+
+    /// 창 크기 변경: 실시간으로는 부드럽게 스케일하고, 손을 떼면 좌표를 확정한다.
+    func noteCanvasSize(_ size: CGSize) {
+        guard !isScalingLayout else { return }
+        canvasSize = size
+
+        if layoutAnchorSize.width < 1 || layoutAnchorSize.height < 1 {
+            layoutAnchorSize = size
+            return
+        }
+
+        layoutBakeTask?.cancel()
+        layoutBakeTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 220_000_000)
+            guard !Task.isCancelled else { return }
+            commitLayoutScaleIfNeeded()
+        }
+    }
+
+    private func commitLayoutScaleIfNeeded() {
+        let size = canvasSize
+        let anchor = layoutAnchorSize
+        guard !isScalingLayout,
+              anchor.width > 1, anchor.height > 1,
+              size.width > 1, size.height > 1 else { return }
+
+        let scale = min(size.width / anchor.width, size.height / anchor.height)
+        guard abs(scale - 1) >= 0.012 else {
+            layoutAnchorSize = size
+            return
+        }
+
+        isScalingLayout = true
+        defer { isScalingLayout = false }
+
+        // bake 직후 scaleEffect가 1로 보간되며 한 번 더 줄어들지 않게 애니메이션 차단
+        var transaction = Transaction()
+        transaction.disablesAnimations = true
+        withTransaction(transaction) {
+            applyLayoutScale(scale)
+            layoutAnchorSize = size
+        }
+    }
+
+    private func applyLayoutScale(_ scale: CGFloat) {
+        drawing = drawing.transformed(using: CGAffineTransform(scaleX: scale, y: scale))
+        shapes = shapes.map { shape in
+            var next = shape
+            next.x *= scale
+            next.y *= scale
+            next.width *= scale
+            next.height *= scale
+            return next
+        }
+        lines = lines.map { line in
+            var next = line
+            next.x1 *= scale
+            next.y1 *= scale
+            next.x2 *= scale
+            next.y2 *= scale
+            next.width = max(1, next.width * scale)
+            return next
+        }
+        viewport.contentOffset = CGPoint(
+            x: viewport.contentOffset.x * scale,
+            y: viewport.contentOffset.y * scale
+        )
+        persist()
     }
 
     func persist() {

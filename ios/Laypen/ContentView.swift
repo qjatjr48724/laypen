@@ -16,6 +16,7 @@ struct ContentView: View {
                 canUndo: $session.canUndo,
                 canRedo: $session.canRedo,
                 viewport: $session.viewport,
+                layoutAnchorSize: session.layoutAnchorSize,
                 tool: session.currentTool,
                 isDrawingEnabled: session.settings.isDrawingEnabled,
                 allowsFingerDrawing: session.settings.allowsFingerDrawing,
@@ -24,7 +25,7 @@ struct ContentView: View {
                 onShapesChanged: { session.persist() },
                 onLinesChanged: { session.persist() },
                 onWhiteRectPlacementFinished: { session.endWhiteRectPlacement() },
-                onCanvasSizeChange: { session.canvasSize = $0 }
+                onCanvasSizeChange: { session.noteCanvasSize($0) }
             )
             .ignoresSafeArea()
 
@@ -41,7 +42,7 @@ struct ContentView: View {
                 .allowsHitTesting(false)
             }
 
-            EdgeSnappingDraggable {
+            EdgeSnappingDraggable { maxHeight in
                 FloatingToolbar(
                     settings: $session.settings,
                     isMenuOpen: $session.isMenuOpen,
@@ -61,7 +62,8 @@ struct ContentView: View {
                     },
                     onExportShare: {
                         Task { await session.prepareShare() }
-                    }
+                    },
+                    availableHeight: maxHeight
                 )
             }
         }

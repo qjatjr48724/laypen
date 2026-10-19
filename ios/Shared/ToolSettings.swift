@@ -30,6 +30,8 @@ enum DrawingToolKind: String, CaseIterable, Identifiable, Codable {
 
 struct ToolSettings: Codable, Equatable {
     var selectedTool: DrawingToolKind = .blackPen
+    /// 지우개 전환 전에 쓰던 잉크 도구 (검정/컬러/형광)
+    var lastInkTool: DrawingToolKind = .blackPen
     var isDrawingEnabled: Bool = true
     /// true면 손가락+펜, false면 Apple Pencil만 필기
     var allowsFingerDrawing: Bool = true
@@ -44,6 +46,43 @@ struct ToolSettings: Codable, Equatable {
     /// UIColor.black는 다크모드에서 동적 색으로 뒤집힐 수 있어 고정 RGB를 사용한다.
     private static let solidBlack = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
 
+    enum CodingKeys: String, CodingKey {
+        case selectedTool, lastInkTool, isDrawingEnabled, allowsFingerDrawing
+        case blackPenWidth, colorPenWidth, colorPenColorHex
+        case highlighterWidth, highlighterColorHex, eraserWidth
+    }
+
+    init() {}
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        selectedTool = try c.decodeIfPresent(DrawingToolKind.self, forKey: .selectedTool) ?? .blackPen
+        isDrawingEnabled = try c.decodeIfPresent(Bool.self, forKey: .isDrawingEnabled) ?? true
+        allowsFingerDrawing = try c.decodeIfPresent(Bool.self, forKey: .allowsFingerDrawing) ?? true
+        blackPenWidth = try c.decodeIfPresent(CGFloat.self, forKey: .blackPenWidth) ?? 5
+        colorPenWidth = try c.decodeIfPresent(CGFloat.self, forKey: .colorPenWidth) ?? 5
+        colorPenColorHex = try c.decodeIfPresent(String.self, forKey: .colorPenColorHex) ?? "#E53935"
+        highlighterWidth = try c.decodeIfPresent(CGFloat.self, forKey: .highlighterWidth) ?? 18
+        highlighterColorHex = try c.decodeIfPresent(String.self, forKey: .highlighterColorHex) ?? "#FFEB3B"
+        eraserWidth = try c.decodeIfPresent(CGFloat.self, forKey: .eraserWidth) ?? 30
+
+        if let savedLast = try c.decodeIfPresent(DrawingToolKind.self, forKey: .lastInkTool),
+           savedLast != .eraser {
+            lastInkTool = savedLast
+        } else if selectedTool != .eraser {
+            lastInkTool = selectedTool
+        } else {
+            lastInkTool = .blackPen
+        }
+    }
+
+    var isEraserSelected: Bool { selectedTool == .eraser }
+
+    /// 빠른 전환 시 돌아갈 잉크 도구 (지우개가 저장돼 있으면 검정으로 보정)
+    var resolvedLastInkTool: DrawingToolKind {
+        lastInkTool == .eraser ? .blackPen : lastInkTool
+    }
+
     func makeTool(for kind: DrawingToolKind) -> PKTool {
         switch kind {
         case .blackPen:
@@ -55,6 +94,23 @@ struct ToolSettings: Codable, Equatable {
             return PKInkingTool(.marker, color: color, width: highlighterWidth)
         case .eraser:
             return PKEraserTool(.bitmap, width: eraserWidth)
+        }
+    }
+
+    mutating func selectTool(_ kind: DrawingToolKind) {
+        if kind != .eraser {
+            lastInkTool = kind
+        }
+        selectedTool = kind
+    }
+
+    /// 지우개 ↔ 직전 펜/형광 전환
+    mutating func toggleEraserWithLastInk() {
+        if selectedTool == .eraser {
+            selectedTool = resolvedLastInkTool
+        } else {
+            lastInkTool = selectedTool
+            selectedTool = .eraser
         }
     }
 
