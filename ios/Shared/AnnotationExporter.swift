@@ -1,6 +1,5 @@
 import PencilKit
 import Photos
-import SwiftUI
 import UIKit
 
 enum AnnotationExportError: LocalizedError {
@@ -24,7 +23,6 @@ enum AnnotationExporter {
     static func compose(
         background: UIImage?,
         shapes: [WhiteRectShape],
-        lines: [LineShape] = [],
         drawing: PKDrawing,
         canvasSize: CGSize,
         scale: CGFloat = UIScreen.main.scale
@@ -51,16 +49,6 @@ enum AnnotationExporter {
             for shape in shapes {
                 let path = UIBezierPath(roundedRect: shape.rect, cornerRadius: 4)
                 path.fill()
-            }
-
-            for line in lines {
-                let path = UIBezierPath()
-                path.move(to: line.start)
-                path.addLine(to: line.end)
-                path.lineWidth = line.width
-                path.lineCapStyle = .round
-                UIColor(Color(hex: line.colorHex)).setStroke()
-                path.stroke()
             }
 
             let bounds = CGRect(origin: .zero, size: logicalSize)

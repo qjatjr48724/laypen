@@ -103,9 +103,7 @@ private struct ShareDrawingView: View {
                 AnnotatedCanvas(
                     drawing: $model.drawing,
                     shapes: $model.shapes,
-                    lines: $model.lines,
                     selectedShapeID: $model.selectedShapeID,
-                    selectedLineID: $model.selectedLineID,
                     canUndo: $model.canUndo,
                     canRedo: $model.canRedo,
                     viewport: $model.viewport,
@@ -116,7 +114,6 @@ private struct ShareDrawingView: View {
                     isPlacingWhiteRect: model.isPlacingWhiteRect,
                     backgroundImage: model.backgroundImage,
                     onShapesChanged: { model.persist() },
-                    onLinesChanged: { model.persist() },
                     onWhiteRectPlacementFinished: { model.endWhiteRectPlacement() },
                     onCanvasSizeChange: { model.noteCanvasSize($0) }
                 )

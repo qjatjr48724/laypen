@@ -410,9 +410,7 @@ struct DrawingCanvasView: UIViewRepresentable {
 struct AnnotatedCanvas: View {
     @Binding var drawing: PKDrawing
     @Binding var shapes: [WhiteRectShape]
-    @Binding var lines: [LineShape]
     @Binding var selectedShapeID: UUID?
-    @Binding var selectedLineID: UUID?
     @Binding var canUndo: Bool
     @Binding var canRedo: Bool
     @Binding var viewport: CanvasViewport
@@ -423,7 +421,6 @@ struct AnnotatedCanvas: View {
     var isPlacingWhiteRect: Bool
     var backgroundImage: UIImage?
     var onShapesChanged: () -> Void
-    var onLinesChanged: () -> Void
     var onWhiteRectPlacementFinished: () -> Void
     var onCanvasSizeChange: ((CGSize) -> Void)?
 
@@ -461,21 +458,6 @@ struct AnnotatedCanvas: View {
                     )
                 }
                 .zIndex(isPlacingWhiteRect ? 3 : (isDrawingEnabled ? 0 : 2))
-
-                transformedContent(size: anchor) {
-                    LineBoardLayer(
-                        lines: $lines,
-                        selectedID: $selectedLineID,
-                        isDrawingEnabled: isDrawingEnabled && !isLiveResizing,
-                        isPlacing: false,
-                        draftColorHex: "#000000",
-                        draftWidth: 5,
-                        onPlacementFinished: {},
-                        onLinesChanged: onLinesChanged
-                    )
-                }
-                .allowsHitTesting(!isPlacingWhiteRect && !isLiveResizing)
-                .zIndex(isDrawingEnabled && !isPlacingWhiteRect ? 0 : 2)
 
                 DrawingCanvasView(
                     drawing: $drawing,

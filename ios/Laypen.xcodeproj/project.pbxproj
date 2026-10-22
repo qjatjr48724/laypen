@@ -8,12 +8,13 @@
 
 /* Begin PBXBuildFile section */
 		00512994770D36A16533AAC8 /* ShareHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */; };
+		020D617C1C1765BA2CF146C9 /* LaypenMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 91DD1891538B5B036F632489 /* LaypenMacApp.swift */; };
 		05E69482E44BD8470241CE1B /* WhiteRectShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FC3C8B5BB25B30825F2304 /* WhiteRectShape.swift */; };
 		06A3B9A55BAE8941BAF53C35 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 190B600ED372BCF3D974E84A /* ContentView.swift */; };
 		09AA4D3AFAD5800D28D7E12D /* ShortcutsGuideSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */; };
 		0C394AEFB5A60070A4DE3C21 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF0890947E173A5151615D1 /* SessionStore.swift */; };
+		1053CFA4A946B88F27D84EED /* MacHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072E41233F6655A05050A032 /* MacHostView.swift */; };
 		19C030A073ABBD313A71522D /* ToolSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */; };
-		1AF281A69D7443BD8C9D5D26 /* LineBoardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0747887D96118373EBE974B7 /* LineBoardLayer.swift */; };
 		2D8F611CC3186D7A42CF4D88 /* EdgeSnappingDraggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */; };
 		36AD9179A99E38738E56B2C1 /* StrokeStraightener.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */; };
 		3A58CCFA864AFF9B8FF7589C /* DrawingCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E35FE93494FEC32998312B /* DrawingCanvasView.swift */; };
@@ -22,39 +23,46 @@
 		3FCC453ACAD03875FFF70AC3 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90088A744553C80895817A1 /* ShareSheet.swift */; };
 		45206BDC84F97C993815510E /* ToolSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */; };
 		482E677833FE08F2E76E81E9 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF0890947E173A5151615D1 /* SessionStore.swift */; };
+		4918C110B05520369A08AABD /* LinkTrustStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9681CCF5DEE3E9ADBBE3D0 /* LinkTrustStore.swift */; };
+		4BB91C6B5ACC7FCA2D4D0167 /* LinkMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB2A501B26E5251BF618332 /* LinkMessages.swift */; };
 		6084D216832FD74002E0DEAD /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBCCE3839FF2F5F6BBB4FB /* AppGroup.swift */; };
 		649474C4B2968E6BCFC2C3E2 /* ShareHandoff.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */; };
 		64D95DCABEE64E2A246F66F7 /* ShortcutsGuideSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */; };
 		67AE8B01CFAF17085C1E5861 /* ToolSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */; };
 		6C6C4EA9D285A3C50DA0C5C0 /* FloatingToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */; };
 		6DF605C83C895638AE50C986 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978DCDCA55AA604E091A760 /* ShareViewController.swift */; };
+		702C3FC831E555B302F05508 /* OverlayPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3759CB871AF48D77C6367EEE /* OverlayPanel.swift */; };
+		7DAF600D0F683D5671874D2F /* MacLinkHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDE2385397115BB603ED93B /* MacLinkHost.swift */; };
+		7FC1D088AC55E0AA75BF56AC /* LinkChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E555164A06F5E836036CD5 /* LinkChannel.swift */; };
 		80403041B7B728E06311C34A /* FloatingToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */; };
+		80F397E10738724BB39B99BC /* MacLinkView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A04C3E0C4F266F2E21F880A0 /* MacLinkView.swift */; };
 		81D8319FC83D90E8C3B44B4C /* DrawingCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E35FE93494FEC32998312B /* DrawingCanvasView.swift */; };
 		85EB479E4A7502FCDD44E624 /* AnnotationExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2059746C151860ABE2A40C /* AnnotationExporter.swift */; };
 		87BF9CE4EE0C16409A350454 /* BackgroundSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */; };
+		972184D4ACACB0AF527D050C /* LinkMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB2A501B26E5251BF618332 /* LinkMessages.swift */; };
+		9793CFB5DE5FD3219CC3E8A6 /* LinkTrustStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9681CCF5DEE3E9ADBBE3D0 /* LinkTrustStore.swift */; };
 		97E1A6DC72C6A13E4F5B4E55 /* LaypenShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C140FA12DB53D7C1F014BE16 /* LaypenShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
-		A23093753ABC1385D097C58D /* LineBoardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0747887D96118373EBE974B7 /* LineBoardLayer.swift */; };
 		A4AFD37440D9EE17560F379A /* ToolSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */; };
-		A7C56A4B3F7D464DB5736E5E /* LineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EFC8B44FA8BC546E7C9A7E5 /* LineStore.swift */; };
-		ACF96BBEE3AE1CEEA395D7F8 /* LineStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EFC8B44FA8BC546E7C9A7E5 /* LineStore.swift */; };
 		AD042B1D9DD100F57D70987D /* ShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A5B660FFFBE5816A04D41B /* ShapeStore.swift */; };
 		ADB23C5DE38EF29EAA5CEF7F /* DrawingSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */; };
 		AE1FF796DA9B4DF25923C95C /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 2EDDF40D347793170D3E2972 /* Assets.xcassets */; };
 		AEB2359DBDD7D750289BFA2A /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90088A744553C80895817A1 /* ShareSheet.swift */; };
 		B2DF4687172A2BCE83DFE55E /* WhiteboardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55490695088C3B2A1031A58F /* WhiteboardLayer.swift */; };
 		B7BA8DBB1BDB4BA2287745DC /* BackgroundSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */; };
-		B9326DC7379E5B7574671B37 /* LineShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = F507F5ED2CF5B9CE4568E860 /* LineShape.swift */; };
 		B9C0BB0CF3EC717EE65F3B45 /* CanvasViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */; };
+		BD63ABD42C2FE07B75B7CDAF /* MacLinkModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 05042395AFB65F758AB39E79 /* MacLinkModel.swift */; };
 		BEC605771B7BB8EEC793EE39 /* AppGroup.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0ECBCCE3839FF2F5F6BBB4FB /* AppGroup.swift */; };
 		BF135145B33146CE0DDE405B /* ColorContrast.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4AEBCDB3976B6FEDBF168 /* ColorContrast.swift */; };
+		C607CD7739A645E2535F9DB6 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 11B47277FAA3E3A98A4B7243 /* Assets.xcassets */; };
 		C906DC415EAE838C73221C57 /* ShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A5B660FFFBE5816A04D41B /* ShapeStore.swift */; };
 		C9C39C9D9E337331C7DAEB43 /* StrokeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CD837D5E28F2536CB39C45 /* StrokeStore.swift */; };
 		C9E3689CE362970179ADFB28 /* StrokeStraightener.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */; };
+		CDF530A2748A6C50C16581ED /* ScreenSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27CE52E5968A6C88C6DEDEC1 /* ScreenSender.swift */; };
 		CEA83171DBA4DBE4AA047A48 /* ColorContrast.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4AEBCDB3976B6FEDBF168 /* ColorContrast.swift */; };
 		DD8F837A7AB086EC865E34FC /* CanvasViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */; };
 		DF160802D171A00CD6CEA2DB /* WhiteboardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55490695088C3B2A1031A58F /* WhiteboardLayer.swift */; };
-		E1B356FBB835C6A66D68D569 /* LineShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = F507F5ED2CF5B9CE4568E860 /* LineShape.swift */; };
 		F0833B67DFFB832CECC9732E /* DrawingSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */; };
+		F2518F44B6E5CE886D7D4E77 /* LinkChannel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A2E555164A06F5E836036CD5 /* LinkChannel.swift */; };
 		F2A81C45598A9FB03983C9C3 /* LaypenApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A25651C25BB42D786DD2EC79 /* LaypenApp.swift */; };
 		F5C3CB0C36ABED6A0B4C654A /* EdgeSnappingDraggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */; };
 		F8C590F4F3E71A92551E54CB /* StrokeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = D7CD837D5E28F2536CB39C45 /* StrokeStore.swift */; };
@@ -85,24 +93,34 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
-		0747887D96118373EBE974B7 /* LineBoardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineBoardLayer.swift; sourceTree = "<group>"; };
+		05042395AFB65F758AB39E79 /* MacLinkModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacLinkModel.swift; sourceTree = "<group>"; };
+		072E41233F6655A05050A032 /* MacHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacHostView.swift; sourceTree = "<group>"; };
 		0ECBCCE3839FF2F5F6BBB4FB /* AppGroup.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppGroup.swift; sourceTree = "<group>"; };
+		0EDE2385397115BB603ED93B /* MacLinkHost.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacLinkHost.swift; sourceTree = "<group>"; };
+		11B47277FAA3E3A98A4B7243 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingToolbar.swift; sourceTree = "<group>"; };
 		190B600ED372BCF3D974E84A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		24FC3C8B5BB25B30825F2304 /* WhiteRectShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteRectShape.swift; sourceTree = "<group>"; };
+		27CE52E5968A6C88C6DEDEC1 /* ScreenSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSender.swift; sourceTree = "<group>"; };
 		2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHandoff.swift; sourceTree = "<group>"; };
 		2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EdgeSnappingDraggable.swift; sourceTree = "<group>"; };
 		2EDDF40D347793170D3E2972 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolSettingsStore.swift; sourceTree = "<group>"; };
+		3759CB871AF48D77C6367EEE /* OverlayPanel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = OverlayPanel.swift; sourceTree = "<group>"; };
+		4750492DECBBE167E541E527 /* LaypenMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaypenMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4978DCDCA55AA604E091A760 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
+		4B9681CCF5DEE3E9ADBBE3D0 /* LinkTrustStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkTrustStore.swift; sourceTree = "<group>"; };
 		55490695088C3B2A1031A58F /* WhiteboardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardLayer.swift; sourceTree = "<group>"; };
 		57A5B660FFFBE5816A04D41B /* ShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeStore.swift; sourceTree = "<group>"; };
-		5EFC8B44FA8BC546E7C9A7E5 /* LineStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineStore.swift; sourceTree = "<group>"; };
+		7AB2A501B26E5251BF618332 /* LinkMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkMessages.swift; sourceTree = "<group>"; };
 		8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSource.swift; sourceTree = "<group>"; };
 		8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewport.swift; sourceTree = "<group>"; };
+		91DD1891538B5B036F632489 /* LaypenMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaypenMacApp.swift; sourceTree = "<group>"; };
 		96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsGuideSheet.swift; sourceTree = "<group>"; };
 		9FF0890947E173A5151615D1 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
+		A04C3E0C4F266F2E21F880A0 /* MacLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacLinkView.swift; sourceTree = "<group>"; };
 		A25651C25BB42D786DD2EC79 /* LaypenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaypenApp.swift; sourceTree = "<group>"; };
+		A2E555164A06F5E836036CD5 /* LinkChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkChannel.swift; sourceTree = "<group>"; };
 		ACC877A0926C1D6C9FF58435 /* Laypen.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Laypen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolSettings.swift; sourceTree = "<group>"; };
 		BF2059746C151860ABE2A40C /* AnnotationExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationExporter.swift; sourceTree = "<group>"; };
@@ -113,7 +131,6 @@
 		DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingSessionModel.swift; sourceTree = "<group>"; };
 		E1E35FE93494FEC32998312B /* DrawingCanvasView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DrawingCanvasView.swift; sourceTree = "<group>"; };
 		E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StrokeStraightener.swift; sourceTree = "<group>"; };
-		F507F5ED2CF5B9CE4568E860 /* LineShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LineShape.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXGroup section */
@@ -129,9 +146,33 @@
 			isa = PBXGroup;
 			children = (
 				ACC877A0926C1D6C9FF58435 /* Laypen.app */,
+				4750492DECBBE167E541E527 /* LaypenMac.app */,
 				C140FA12DB53D7C1F014BE16 /* LaypenShare.appex */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		82A00C36AD1A3D5B3D5C726F /* Mac */ = {
+			isa = PBXGroup;
+			children = (
+				11B47277FAA3E3A98A4B7243 /* Assets.xcassets */,
+				91DD1891538B5B036F632489 /* LaypenMacApp.swift */,
+				072E41233F6655A05050A032 /* MacHostView.swift */,
+				0EDE2385397115BB603ED93B /* MacLinkHost.swift */,
+				3759CB871AF48D77C6367EEE /* OverlayPanel.swift */,
+				27CE52E5968A6C88C6DEDEC1 /* ScreenSender.swift */,
+			);
+			path = Mac;
+			sourceTree = "<group>";
+		};
+		E70505BB7D78B935E8C61198 /* Link */ = {
+			isa = PBXGroup;
+			children = (
+				A2E555164A06F5E836036CD5 /* LinkChannel.swift */,
+				7AB2A501B26E5251BF618332 /* LinkMessages.swift */,
+				4B9681CCF5DEE3E9ADBBE3D0 /* LinkTrustStore.swift */,
+			);
+			path = Link;
 			sourceTree = "<group>";
 		};
 		EB99D3F7229081E4223E14A9 /* Shared */ = {
@@ -146,9 +187,6 @@
 				DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */,
 				2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */,
 				148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */,
-				0747887D96118373EBE974B7 /* LineBoardLayer.swift */,
-				F507F5ED2CF5B9CE4568E860 /* LineShape.swift */,
-				5EFC8B44FA8BC546E7C9A7E5 /* LineStore.swift */,
 				9FF0890947E173A5151615D1 /* SessionStore.swift */,
 				57A5B660FFFBE5816A04D41B /* ShapeStore.swift */,
 				2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */,
@@ -170,6 +208,8 @@
 				2EDDF40D347793170D3E2972 /* Assets.xcassets */,
 				190B600ED372BCF3D974E84A /* ContentView.swift */,
 				A25651C25BB42D786DD2EC79 /* LaypenApp.swift */,
+				05042395AFB65F758AB39E79 /* MacLinkModel.swift */,
+				A04C3E0C4F266F2E21F880A0 /* MacLinkView.swift */,
 			);
 			path = Laypen;
 			sourceTree = "<group>";
@@ -179,6 +219,8 @@
 			children = (
 				ECC410389BFD48551FE75F15 /* Laypen */,
 				2B55FED7B58F999612D2CE76 /* LaypenShare */,
+				E70505BB7D78B935E8C61198 /* Link */,
+				82A00C36AD1A3D5B3D5C726F /* Mac */,
 				EB99D3F7229081E4223E14A9 /* Shared */,
 				3E70043D566F2CF2A1EC3ECB /* Products */,
 			);
@@ -205,6 +247,24 @@
 			);
 			productName = Laypen;
 			productReference = ACC877A0926C1D6C9FF58435 /* Laypen.app */;
+			productType = "com.apple.product-type.application";
+		};
+		3FAC9E96642BED3F0653AFB0 /* LaypenMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1B9713DAFA3334CDA087777A /* Build configuration list for PBXNativeTarget "LaypenMac" */;
+			buildPhases = (
+				2E86FEA36D927741585789DA /* Sources */,
+				147126D2973366BAFB2FA2CE /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = LaypenMac;
+			packageProductDependencies = (
+			);
+			productName = LaypenMac;
+			productReference = 4750492DECBBE167E541E527 /* LaypenMac.app */;
 			productType = "com.apple.product-type.application";
 		};
 		F2C05CF59ED493C2197727D8 /* LaypenShare */ = {
@@ -237,6 +297,10 @@
 						DevelopmentTeam = PW795XA9ST;
 						ProvisioningStyle = Automatic;
 					};
+					3FAC9E96642BED3F0653AFB0 = {
+						DevelopmentTeam = PW795XA9ST;
+						ProvisioningStyle = Automatic;
+					};
 					F2C05CF59ED493C2197727D8 = {
 						DevelopmentTeam = PW795XA9ST;
 						ProvisioningStyle = Automatic;
@@ -259,6 +323,7 @@
 			targets = (
 				0EDA36CCCE44D42B93D3AA2D /* Laypen */,
 				F2C05CF59ED493C2197727D8 /* LaypenShare */,
+				3FAC9E96642BED3F0653AFB0 /* LaypenMac */,
 			);
 		};
 /* End PBXProject section */
@@ -272,9 +337,32 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		147126D2973366BAFB2FA2CE /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C607CD7739A645E2535F9DB6 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		2E86FEA36D927741585789DA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				020D617C1C1765BA2CF146C9 /* LaypenMacApp.swift in Sources */,
+				F2518F44B6E5CE886D7D4E77 /* LinkChannel.swift in Sources */,
+				972184D4ACACB0AF527D050C /* LinkMessages.swift in Sources */,
+				4918C110B05520369A08AABD /* LinkTrustStore.swift in Sources */,
+				1053CFA4A946B88F27D84EED /* MacHostView.swift in Sources */,
+				7DAF600D0F683D5671874D2F /* MacLinkHost.swift in Sources */,
+				702C3FC831E555B302F05508 /* OverlayPanel.swift in Sources */,
+				CDF530A2748A6C50C16581ED /* ScreenSender.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		714BDC8A1A21E7472D367ED2 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -288,9 +376,6 @@
 				F0833B67DFFB832CECC9732E /* DrawingSessionModel.swift in Sources */,
 				2D8F611CC3186D7A42CF4D88 /* EdgeSnappingDraggable.swift in Sources */,
 				6C6C4EA9D285A3C50DA0C5C0 /* FloatingToolbar.swift in Sources */,
-				A23093753ABC1385D097C58D /* LineBoardLayer.swift in Sources */,
-				B9326DC7379E5B7574671B37 /* LineShape.swift in Sources */,
-				ACF96BBEE3AE1CEEA395D7F8 /* LineStore.swift in Sources */,
 				0C394AEFB5A60070A4DE3C21 /* SessionStore.swift in Sources */,
 				C906DC415EAE838C73221C57 /* ShapeStore.swift in Sources */,
 				649474C4B2968E6BCFC2C3E2 /* ShareHandoff.swift in Sources */,
@@ -321,9 +406,11 @@
 				F5C3CB0C36ABED6A0B4C654A /* EdgeSnappingDraggable.swift in Sources */,
 				80403041B7B728E06311C34A /* FloatingToolbar.swift in Sources */,
 				F2A81C45598A9FB03983C9C3 /* LaypenApp.swift in Sources */,
-				1AF281A69D7443BD8C9D5D26 /* LineBoardLayer.swift in Sources */,
-				E1B356FBB835C6A66D68D569 /* LineShape.swift in Sources */,
-				A7C56A4B3F7D464DB5736E5E /* LineStore.swift in Sources */,
+				7FC1D088AC55E0AA75BF56AC /* LinkChannel.swift in Sources */,
+				4BB91C6B5ACC7FCA2D4D0167 /* LinkMessages.swift in Sources */,
+				9793CFB5DE5FD3219CC3E8A6 /* LinkTrustStore.swift in Sources */,
+				BD63ABD42C2FE07B75B7CDAF /* MacLinkModel.swift in Sources */,
+				80F397E10738724BB39B99BC /* MacLinkView.swift in Sources */,
 				482E677833FE08F2E76E81E9 /* SessionStore.swift in Sources */,
 				AD042B1D9DD100F57D70987D /* ShapeStore.swift in Sources */,
 				00512994770D36A16533AAC8 /* ShareHandoff.swift in Sources */,
@@ -363,11 +450,29 @@
 			};
 			name = Debug;
 		};
+		320C227B185892E7A5A3BAA2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Mac/LaypenMac.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Mac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.mac;
+				PRODUCT_NAME = LaypenMac;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
 		3DAD9CC33A8D33E22EA3D2C5 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				BASE_SDK = iphoneos;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -417,11 +522,9 @@
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_OPTIMIZATION_LEVEL = "-O";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Release;
 		};
@@ -465,11 +568,29 @@
 			};
 			name = Release;
 		};
+		5554A638246BB3DC194A0C9A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Mac/LaypenMac.entitlements;
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Mac/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.mac;
+				PRODUCT_NAME = LaypenMac;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
 		733D0E225015A1B4A02F5DAF /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
-				BASE_SDK = iphoneos;
 				CLANG_ANALYZER_NONNULL = YES;
 				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
 				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
@@ -526,11 +647,9 @@
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_NAME = "$(TARGET_NAME)";
-				SDKROOT = iphoneos;
 				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 2;
 			};
 			name = Debug;
 		};
@@ -556,6 +675,15 @@
 			buildConfigurations = (
 				220D9EE3BC0064228EB26EC2 /* Debug */,
 				AF5DF98DA1CC4113347D609D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1B9713DAFA3334CDA087777A /* Build configuration list for PBXNativeTarget "LaypenMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				320C227B185892E7A5A3BAA2 /* Debug */,
+				5554A638246BB3DC194A0C9A /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

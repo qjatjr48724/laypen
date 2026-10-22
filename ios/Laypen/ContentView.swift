@@ -4,15 +4,14 @@ import PhotosUI
 struct ContentView: View {
     @StateObject private var session = DrawingSessionModel()
     @State private var photoItem: PhotosPickerItem?
+    @State private var showMacLink = false
 
     var body: some View {
         ZStack {
             AnnotatedCanvas(
                 drawing: $session.drawing,
                 shapes: $session.shapes,
-                lines: $session.lines,
                 selectedShapeID: $session.selectedShapeID,
-                selectedLineID: $session.selectedLineID,
                 canUndo: $session.canUndo,
                 canRedo: $session.canRedo,
                 viewport: $session.viewport,
@@ -23,7 +22,6 @@ struct ContentView: View {
                 isPlacingWhiteRect: session.isPlacingWhiteRect,
                 backgroundImage: session.backgroundImage,
                 onShapesChanged: { session.persist() },
-                onLinesChanged: { session.persist() },
                 onWhiteRectPlacementFinished: { session.endWhiteRectPlacement() },
                 onCanvasSizeChange: { session.noteCanvasSize($0) }
             )
@@ -63,6 +61,7 @@ struct ContentView: View {
                     onExportShare: {
                         Task { await session.prepareShare() }
                     },
+                    onConnectMac: { showMacLink = true },
                     availableHeight: maxHeight
                 )
             }
@@ -113,5 +112,8 @@ struct ContentView: View {
             Text(session.saveMessage ?? "")
         }
         .laypenShareSheet(image: $session.shareImage)
+        .fullScreenCover(isPresented: $showMacLink) {
+            MacLinkView(settings: $session.settings)
+        }
     }
 }

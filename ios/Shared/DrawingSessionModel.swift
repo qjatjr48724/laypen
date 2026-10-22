@@ -12,9 +12,7 @@ final class DrawingSessionModel: ObservableObject {
     @Published var showClearConfirm = false
     @Published var showClearInkConfirm = false
     @Published var shapes: [WhiteRectShape] = []
-    @Published var lines: [LineShape] = []
     @Published var selectedShapeID: UUID?
-    @Published var selectedLineID: UUID?
     @Published var isPlacingWhiteRect = false
     @Published var canvasSize: CGSize = .zero
     /// 필기·상자 좌표가 작성된 기준 크기. 창 리사이즈 중에는 이 크기 기준으로 부드럽게 스케일한다.
@@ -32,7 +30,6 @@ final class DrawingSessionModel: ObservableObject {
     private let strokeStore = StrokeStore()
     private let sessionStore = SessionStore()
     private let shapeStore = ShapeStore()
-    private let lineStore = LineStore()
     private let toolSettingsStore = ToolSettingsStore()
 
     var currentTool: PKTool {
@@ -44,7 +41,6 @@ final class DrawingSessionModel: ObservableObject {
         strokeStore.loadFromDisk()
         drawing = strokeStore.drawing
         shapes = shapeStore.load()
-        lines = lineStore.load()
         if !consumePendingShareIfNeeded() {
             backgroundImage = sessionStore.loadBackground()
         }
@@ -119,15 +115,6 @@ final class DrawingSessionModel: ObservableObject {
             next.height *= scale
             return next
         }
-        lines = lines.map { line in
-            var next = line
-            next.x1 *= scale
-            next.y1 *= scale
-            next.x2 *= scale
-            next.y2 *= scale
-            next.width = max(1, next.width * scale)
-            return next
-        }
         viewport.contentOffset = CGPoint(
             x: viewport.contentOffset.x * scale,
             y: viewport.contentOffset.y * scale
@@ -139,7 +126,6 @@ final class DrawingSessionModel: ObservableObject {
         strokeStore.replace(drawing)
         strokeStore.saveToDisk()
         shapeStore.save(shapes)
-        lineStore.save(lines)
         toolSettingsStore.save(settings)
         sessionStore.saveMetadata(
             SessionMetadata(updatedAt: Date(), hasBackgroundImage: backgroundImage != nil)
@@ -155,7 +141,6 @@ final class DrawingSessionModel: ObservableObject {
         settings.isDrawingEnabled = false
         isMenuOpen = false
         selectedShapeID = nil
-        selectedLineID = nil
     }
 
     func endWhiteRectPlacement() {
@@ -182,9 +167,7 @@ final class DrawingSessionModel: ObservableObject {
     func clearAllConfirmed() {
         drawing = PKDrawing()
         shapes = []
-        lines = []
         selectedShapeID = nil
-        selectedLineID = nil
         persist()
     }
 
@@ -193,7 +176,6 @@ final class DrawingSessionModel: ObservableObject {
         return AnnotationExporter.compose(
             background: backgroundImage,
             shapes: shapes,
-            lines: lines,
             drawing: drawing,
             canvasSize: canvasSize
         )

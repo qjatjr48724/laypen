@@ -18,6 +18,13 @@ struct FloatingToolbar: View {
     var onAddWhiteRect: () -> Void
     var onSavePhoto: () -> Void
     var onExportShare: () -> Void
+    var onConnectMac: (() -> Void)? = nil
+    var showsMacScreen: Binding<Bool>? = nil
+    /// 맥 화면 위 필기·상자를 지우지 않고 잠깐 숨긴다. nil이면 버튼을 그리지 않는다.
+    var showsMacInk: Binding<Bool>? = nil
+    var onDisconnect: (() -> Void)? = nil
+    /// 맥 연결 화면은 사진 선택·저장·내보내기를 쓰지 않는다.
+    var showsPhotoActions: Bool = true
     /// EdgeSnappingDraggable가 넘기는 가용 높이. 접기 버튼이 잘리지 않게 메뉴 높이를 제한한다.
     var availableHeight: CGFloat = 600
 
@@ -90,6 +97,49 @@ struct FloatingToolbar: View {
                     .background(onOffBackground, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
                 }
                 .buttonStyle(.plain)
+
+                if let showsMacScreen {
+                    let screenOn = showsMacScreen.wrappedValue
+                    Button {
+                        showsMacScreen.wrappedValue.toggle()
+                    } label: {
+                        Image(systemName: "macwindow")
+                            .font(.caption2.weight(.semibold))
+                            .overlay {
+                                if !screenOn {
+                                    Rectangle()
+                                        .fill(Color.primary)
+                                        .frame(width: 1.5, height: 16)
+                                        .rotationEffect(.degrees(-42))
+                                }
+                            }
+                            .foregroundStyle(Color.primary)
+                            .frame(width: buttonSide, height: buttonSide)
+                            .background(
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .fill(Color.primary.opacity(screenOn ? 0.08 : 0.16))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(screenOn ? "맥 화면 끄기" : "맥 화면 켜기")
+                }
+
+                if let showsMacInk {
+                    Button {
+                        showsMacInk.wrappedValue.toggle()
+                    } label: {
+                        Image(systemName: showsMacInk.wrappedValue ? "eye" : "eye.slash")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(showsMacInk.wrappedValue ? Color.primary : Color.secondary)
+                            .frame(width: buttonSide, height: buttonSide)
+                            .background(
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .fill(Color.primary.opacity(showsMacInk.wrappedValue ? 0.08 : 0.16))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(showsMacInk.wrappedValue ? "맥 위 필기 숨기기" : "맥 위 필기 보기")
+                }
             }
 
             if isMenuOpen {
@@ -382,9 +432,32 @@ struct FloatingToolbar: View {
 
             Divider()
 
-            HStack(spacing: 6) {
-                PhotosPicker(selection: $photoItem, matching: .images) {
-                    Label("사진 선택", systemImage: "photo.on.rectangle")
+            if showsPhotoActions {
+                HStack(spacing: 6) {
+                    PhotosPicker(selection: $photoItem, matching: .images) {
+                        Label("사진 선택", systemImage: "photo.on.rectangle")
+                            .font(.caption2.weight(.semibold))
+                            .lineLimit(1)
+                            .minimumScaleFactor(0.8)
+                            .frame(maxWidth: .infinity)
+                            .padding(.vertical, 8)
+                            .padding(.horizontal, 4)
+                            .background(
+                                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                    .fill(Color.primary.opacity(0.06))
+                            )
+                    }
+                    .buttonStyle(.plain)
+
+                    boxButton
+                }
+            } else {
+                boxButton
+            }
+
+            if let onConnectMac {
+                Button(action: onConnectMac) {
+                    Label("맥에 연결", systemImage: "link")
                         .font(.caption2.weight(.semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)
@@ -397,28 +470,11 @@ struct FloatingToolbar: View {
                         )
                 }
                 .buttonStyle(.plain)
-
-                Button(action: onAddWhiteRect) {
-                    Label(
-                        isPlacingWhiteRect ? "크기 지정" : "상자 추가",
-                        systemImage: "rectangle.dashed"
-                    )
-                    .font(.caption2.weight(.semibold))
-                    .lineLimit(1)
-                    .minimumScaleFactor(0.8)
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 8)
-                    .padding(.horizontal, 4)
-                    .background(
-                        RoundedRectangle(cornerRadius: 8, style: .continuous)
-                            .fill(isPlacingWhiteRect ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.06))
-                    )
-                }
-                .buttonStyle(.plain)
             }
 
-            HStack(spacing: 6) {
-                Button(action: onSavePhoto) {
+            if showsPhotoActions {
+                HStack(spacing: 6) {
+                    Button(action: onSavePhoto) {
                     HStack(spacing: 4) {
                         if isSavingPhoto {
                             ProgressView()
@@ -461,6 +517,7 @@ struct FloatingToolbar: View {
                 }
                 .buttonStyle(.plain)
                 .disabled(isSavingPhoto || isPreparingShare)
+                }
             }
 
             HStack(spacing: 6) {
@@ -511,8 +568,38 @@ struct FloatingToolbar: View {
                     .padding(.vertical, 4)
             }
             .buttonStyle(.plain)
+
+            if let onDisconnect {
+                Button(role: .destructive, action: onDisconnect) {
+                    Label("연결 끊기", systemImage: "xmark.circle")
+                        .font(.caption2.weight(.semibold))
+                        .frame(maxWidth: .infinity, alignment: .leading)
+                        .padding(.vertical, 6)
+                }
+                .buttonStyle(.plain)
+            }
         }
         .padding(8)
+    }
+
+    private var boxButton: some View {
+        Button(action: onAddWhiteRect) {
+            Label(
+                isPlacingWhiteRect ? "크기 지정" : "상자 추가",
+                systemImage: "rectangle.dashed"
+            )
+            .font(.caption2.weight(.semibold))
+            .lineLimit(1)
+            .minimumScaleFactor(0.8)
+            .frame(maxWidth: .infinity)
+            .padding(.vertical, 8)
+            .padding(.horizontal, 4)
+            .background(
+                RoundedRectangle(cornerRadius: 8, style: .continuous)
+                    .fill(isPlacingWhiteRect ? Color.accentColor.opacity(0.2) : Color.primary.opacity(0.06))
+            )
+        }
+        .buttonStyle(.plain)
     }
 
     private func inputModeButton(
