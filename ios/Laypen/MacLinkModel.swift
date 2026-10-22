@@ -9,8 +9,14 @@ struct NearbyMac: Identifiable, Hashable {
     var id: NWEndpoint { endpoint }
 
     var isTrusted: Bool {
-        guard let macID else { return false }
-        return LinkTrustStore.token(for: macID) != nil
+        !savedToken.isEmpty
+    }
+
+    var savedToken: String {
+        if let macID, let token = LinkTrustStore.token(for: macID), !token.isEmpty {
+            return token
+        }
+        return LinkTrustStore.token(named: name) ?? ""
     }
 }
 
@@ -35,6 +41,7 @@ final class MacLinkModel: ObservableObject {
     private(set) var boxes: [LinkBox] = []
     var onCanvasChange: (() -> Void)?
 
+    private var pendingPeerName: String?
     private var browser: NWBrowser?
     private var channel: LinkChannel?
     private let queue = DispatchQueue(label: "laypen.link.browser")
@@ -49,7 +56,10 @@ final class MacLinkModel: ObservableObject {
 
     func start() {
         guard browser == nil else { return }
-        let browser = NWBrowser(for: .bonjour(type: LinkService.type, domain: nil), using: LinkService.parameters())
+        let browser = NWBrowser(
+            for: .bonjourWithTXTRecord(type: LinkService.type, domain: nil),
+            using: LinkService.parameters()
+        )
         browser.stateUpdateHandler = { [weak self] state in
             DispatchQueue.main.async {
                 guard let self, !self.isConnected else { return }
@@ -65,12 +75,16 @@ final class MacLinkModel: ObservableObject {
                 guard case let .service(name, _, _, _) = result.endpoint else { return nil }
                 var macID: String?
                 if case let .bonjour(txt) = result.metadata {
-                    macID = txt["id"]
+                    macID = txt.dictionary["id"] ?? txt["id"]
+                }
+                if macID == nil {
+                    macID = LinkTrustStore.remoteID(named: name)
                 }
                 return NearbyMac(name: name, endpoint: result.endpoint, macID: macID)
             }.sorted { $0.name < $1.name }
+            let resolved = Self.attachSoleTrust(found)
             DispatchQueue.main.async {
-                self?.apply(found)
+                self?.apply(resolved)
             }
         }
         browser.start(queue: queue)
@@ -83,7 +97,8 @@ final class MacLinkModel: ObservableObject {
 
     func connect() {
         guard channel == nil, let mac = selectedMac else { return }
-        let saved = mac.macID.flatMap { LinkTrustStore.token(for: $0) } ?? ""
+        pendingPeerName = mac.name
+        let saved = mac.savedToken
         if saved.isEmpty, code.count != 4 { return }
         let connection = NWConnection(to: mac.endpoint, using: LinkService.parameters())
         let channel = LinkChannel(connection)
@@ -185,6 +200,24 @@ final class MacLinkModel: ObservableObject {
         channel?.send(kind: .clearAll, payload: Data())
     }
 
+    private static func attachSoleTrust(_ found: [NearbyMac]) -> [NearbyMac] {
+        guard found.count == 1, found[0].macID == nil, let onlyID = LinkTrustStore.onlyRemoteID() else {
+            return found
+        }
+        var only = found[0]
+        only.macID = onlyID
+        return [only]
+    }
+
+    private func noteTrustedMac(id: String, name: String?) {
+        nearby = nearby.map { mac in
+            guard mac.macID == nil, mac.name == name else { return mac }
+            var next = mac
+            next.macID = id
+            return next
+        }
+    }
+
     private func clampUnit(_ point: CGPoint) -> CGPoint {
         CGPoint(x: min(1, max(0, point.x)), y: min(1, max(0, point.y)))
     }
@@ -195,7 +228,9 @@ final class MacLinkModel: ObservableObject {
             let trust = try? JSONDecoder().decode(LinkAccept.self, from: payload)
             DispatchQueue.main.async {
                 if let trust {
-                    LinkTrustStore.save(token: trust.token, for: trust.macID)
+                    let name = self.pendingPeerName ?? self.selectedMac?.name
+                    LinkTrustStore.save(token: trust.token, for: trust.macID, name: name)
+                    self.noteTrustedMac(id: trust.macID, name: name)
                 }
                 self.isConnected = true
                 self.status = "연결됨"
