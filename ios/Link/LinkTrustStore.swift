@@ -51,6 +51,11 @@ enum LinkTrustStore {
         UserDefaults.standard.set(names, forKey: namesKey)
     }
 
+    static func remove(named name: String) {
+        guard let remoteID = remoteID(named: name) else { return }
+        remove(remoteID)
+    }
+
     static func remove(_ remoteID: String) {
         var map = UserDefaults.standard.dictionary(forKey: tokensKey) as? [String: String] ?? [:]
         map.removeValue(forKey: remoteID)

@@ -6,6 +6,7 @@ final class MacLinkHost: ObservableObject {
     @Published private(set) var code: String
     @Published private(set) var status = "아이패드에서 이 코드를 입력하세요."
     @Published private(set) var captureWarning: String?
+    @Published private(set) var controlWarning: String?
     @Published private(set) var isConnected = false
 
     private var listener: NWListener?
@@ -24,8 +25,13 @@ final class MacLinkHost: ObservableObject {
         guard !didStart else { return }
         didStart = true
         refreshCaptureAccess(prompt: true)
-        sender.onFrame = { [weak self] jpeg in
-            self?.sendFrame(jpeg)
+        refreshControlAccess(prompt: true)
+        sender.onFrame = { [weak self] data, done in
+            guard let self, let channel = self.currentChannel() else {
+                done()
+                return
+            }
+            channel.send(kind: .frame, payload: data, onFlushed: done)
         }
         sender.onStopped = { [weak self] message in
             DispatchQueue.main.async {
@@ -145,6 +151,9 @@ final class MacLinkHost: ObservableObject {
             overlay.clearAll()
         case .overlayVisible:
             overlay.setContentVisible(payload.first != 0)
+        case .pointer:
+            guard let event = PointerEvent(data: payload) else { return }
+            MacPointer.apply(event)
         case .frame, .accept, .reject:
             break
         }
@@ -185,13 +194,26 @@ final class MacLinkHost: ObservableObject {
         guard channel != nil || isConnected else { return }
         captureTask?.cancel()
         sender.stop()
+        MacPointer.releaseButton()
         setChannel(nil)
         isConnected = false
         status = "연결이 끊어졌습니다. 아이패드에서 다시 연결할 수 있습니다."
     }
 
-    private func sendFrame(_ jpeg: Data) {
-        currentChannel()?.send(kind: .frame, payload: jpeg)
+    private func refreshControlAccess(prompt: Bool) {
+        guard !MacPointer.isTrusted else {
+            controlWarning = nil
+            return
+        }
+        controlWarning = "아이패드에서 맥을 조작하려면 손쉬운 사용 권한이 필요합니다."
+        if prompt {
+            MacPointer.prompt()
+        }
+    }
+
+    func openControlSettings() {
+        MacPointer.openSettings()
+        refreshControlAccess(prompt: false)
     }
 
     private func refreshCaptureAccess(prompt: Bool) {

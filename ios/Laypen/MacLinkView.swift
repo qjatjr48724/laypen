@@ -75,7 +75,7 @@ struct MacLinkView: View {
                     .buttonStyle(.bordered)
                 }
             }
-            if !model.selectedMacIsTrusted {
+            if model.asksForCode || !model.selectedMacIsTrusted {
                 TextField("코드 4자리", text: Binding(
                     get: { model.code },
                     set: { model.setCode($0) }
@@ -87,10 +87,12 @@ struct MacLinkView: View {
                 Text("이 맥은 저장되어 있어 코드 없이 연결됩니다.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
+                Button("코드 입력", action: model.requestCodeEntry)
+                    .buttonStyle(.bordered)
             }
             Button("연결", action: model.connect)
                 .buttonStyle(.borderedProminent)
-                .disabled(model.selectedID == nil || (!model.selectedMacIsTrusted && model.code.count != 4))
+                .disabled(model.selectedID == nil || ((model.asksForCode || !model.selectedMacIsTrusted) && model.code.count != 4))
             Spacer()
         }
         .padding(20)
@@ -120,12 +122,25 @@ struct MacLinkView: View {
                     onExportShare: {},
                     showsMacScreen: $model.showsMacScreen,
                     showsMacInk: $model.showsMacInk,
+                    controlsMac: Binding(
+                        get: { model.controlsMac },
+                        set: { model.setControlsMac($0) }
+                    ),
                     onDisconnect: { model.disconnect() },
                     showsPhotoActions: false,
                     availableHeight: maxHeight
                 )
             }
-            if model.isPlacingWhiteRect {
+            if model.controlsMac {
+                Text("펜을 가볍게 대면 커서만 움직이고, 더 세게 누르면 드래그됩니다. 두 손가락은 스크롤")
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .padding(.top, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .allowsHitTesting(false)
+            } else if model.isPlacingWhiteRect {
                 Text("드래그로 상자 크기 지정")
                     .font(.subheadline.weight(.semibold))
                     .padding(.horizontal, 12)
@@ -163,6 +178,9 @@ struct MacLinkCanvas: UIViewRepresentable {
 
     func updateUIView(_ uiView: MacLinkCanvasView, context: Context) {
         bind(uiView)
+        if !model.controlsMac {
+            uiView.releaseControl()
+        }
     }
 
     private func bind(_ view: MacLinkCanvasView) {
@@ -190,6 +208,16 @@ final class MacLinkCanvasView: UIView {
     private var selectedBoxID: UUID?
     private var showTrash = false
     private var overTrash = false
+    private var controlPoints: [ObjectIdentifier: CGPoint] = [:]
+    private var pointerIsDown = false
+    private var scrollCentroid: CGPoint?
+    private var controlCursor: CGPoint?
+    /// 이 비율을 넘으면 드래그를 시작하고, 더 낮아지면 버튼만 놓는다.
+    private let dragPressOn: CGFloat = 0.34
+    private let dragPressOff: CGFloat = 0.16
+    private var cachedInk: UIImage?
+    private var cachedStrokes: [LinkStroke] = []
+    private var cachedInkFit: CGRect = .zero
 
     private enum BoxCorner: CaseIterable {
         case topLeading, topTrailing, bottomLeading, bottomTrailing
@@ -226,7 +254,7 @@ final class MacLinkCanvasView: UIView {
             UIRectFill(bounds)
         }
         drawBoxes(model, fit: fit)
-        renderInk(model.ink.strokes, fit: fit)?.draw(in: bounds)
+        inkLayer(model.ink.strokes, fit: fit)?.draw(in: bounds)
         drawPlacementDraft()
         drawTrash()
         if !model.showsMacScreen {
@@ -237,6 +265,31 @@ final class MacLinkCanvasView: UIView {
             path.stroke()
         }
         drawEraserCursor()
+        drawControlCursor()
+    }
+
+    private func inkLayer(_ strokes: [LinkStroke], fit: CGRect) -> UIImage? {
+        if cachedInkFit == fit, cachedStrokes == strokes {
+            return cachedInk
+        }
+        let image = renderInk(strokes, fit: fit)
+        cachedInk = image
+        cachedStrokes = strokes
+        cachedInkFit = fit
+        return image
+    }
+
+    private func drawControlCursor() {
+        guard let model, model.controlsMac, let center = controlCursor else { return }
+        let dragging = pointerIsDown
+        let side: CGFloat = dragging ? 18 : 14
+        let rect = CGRect(x: center.x - side / 2, y: center.y - side / 2, width: side, height: side)
+        let path = UIBezierPath(ovalIn: rect)
+        (dragging ? UIColor.systemTeal : UIColor.white).setFill()
+        path.fill()
+        UIColor.black.withAlphaComponent(0.8).setStroke()
+        path.lineWidth = 1.5
+        path.stroke()
     }
 
     @objc private func handleHover(_ gesture: UIHoverGestureRecognizer) {
@@ -272,6 +325,10 @@ final class MacLinkCanvasView: UIView {
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         guard let model else { return }
+        if model.controlsMac {
+            trackControl(touches, phase: .began)
+            return
+        }
         if model.isPlacingWhiteRect {
             guard edit == nil, let touch = touches.first else { return }
             let point = touch.location(in: self)
@@ -290,18 +347,147 @@ final class MacLinkCanvasView: UIView {
     }
 
     override func touchesMoved(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if model?.controlsMac == true {
+            trackControl(touches, phase: .moved)
+            return
+        }
         if updateBoxEdit(touches) { return }
         append(touches, event: event, phase: .moved)
     }
 
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if model?.controlsMac == true {
+            trackControl(touches, phase: .ended)
+            return
+        }
         if finishBoxEdit(touches, commit: true) { return }
         append(touches, event: event, phase: .ended)
     }
 
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        if model?.controlsMac == true {
+            trackControl(touches, phase: .cancelled)
+            return
+        }
         if finishBoxEdit(touches, commit: false) { return }
         append(touches, event: event, phase: .ended)
+    }
+
+    private func trackControl(_ touches: Set<UITouch>, phase: UITouch.Phase) {
+        guard let model else { return }
+        let fit = drawingRect(for: model)
+        guard fit.width > 1, fit.height > 1 else { return }
+        for touch in touches {
+            let id = ObjectIdentifier(touch)
+            let point = touch.location(in: self)
+            switch phase {
+            case .ended, .cancelled:
+                controlPoints[id] = point
+            default:
+                controlPoints[id] = point
+            }
+        }
+        if controlPoints.count >= 2 {
+            if pointerIsDown {
+                sendPointer(phase: PointerEvent.ended, fit: fit, point: controlCursor ?? touches.first?.location(in: self) ?? .zero)
+                pointerIsDown = false
+            }
+            let points = Array(controlPoints.values)
+            let centroid = CGPoint(
+                x: points.map(\.x).reduce(0, +) / CGFloat(points.count),
+                y: points.map(\.y).reduce(0, +) / CGFloat(points.count)
+            )
+            if let previous = scrollCentroid {
+                sendPointer(
+                    phase: PointerEvent.scroll,
+                    fit: fit,
+                    point: centroid,
+                    dx: (centroid.x - previous.x) / fit.width,
+                    dy: (centroid.y - previous.y) / fit.height
+                )
+            }
+            scrollCentroid = centroid
+            controlCursor = centroid
+        } else if controlPoints.count == 1, let point = controlPoints.values.first {
+            scrollCentroid = nil
+            controlCursor = point
+            let touch = touches.first { controlPoints[ObjectIdentifier($0)] != nil }
+            if phase == .cancelled {
+                if pointerIsDown {
+                    sendPointer(phase: PointerEvent.cancelled, fit: fit, point: point)
+                    pointerIsDown = false
+                }
+            } else if touch?.type == .pencil, phase != .ended {
+                updatePencilPressure(touch!, point: point, fit: fit)
+            } else if phase == .ended {
+                if pointerIsDown {
+                    sendPointer(phase: PointerEvent.ended, fit: fit, point: point)
+                    pointerIsDown = false
+                }
+            } else if !pointerIsDown {
+                sendPointer(phase: PointerEvent.began, fit: fit, point: point)
+                pointerIsDown = true
+            } else {
+                sendPointer(phase: PointerEvent.moved, fit: fit, point: point)
+            }
+        } else {
+            scrollCentroid = nil
+            controlCursor = nil
+            if pointerIsDown {
+                sendPointer(phase: PointerEvent.ended, fit: fit, point: .zero)
+                pointerIsDown = false
+            }
+        }
+        if phase == .ended || phase == .cancelled {
+            for touch in touches {
+                controlPoints.removeValue(forKey: ObjectIdentifier(touch))
+            }
+            if controlPoints.isEmpty {
+                scrollCentroid = nil
+                if phase == .ended || phase == .cancelled {
+                    controlCursor = nil
+                }
+            }
+        }
+        setNeedsDisplay()
+    }
+
+    private func updatePencilPressure(_ touch: UITouch, point: CGPoint, fit: CGRect) {
+        let maximum = touch.maximumPossibleForce
+        let pressure = maximum > 0 ? touch.force / maximum : 0
+        let pressing = pointerIsDown ? pressure >= dragPressOff : pressure >= dragPressOn
+        if pressing, !pointerIsDown {
+            sendPointer(phase: PointerEvent.began, fit: fit, point: point)
+            pointerIsDown = true
+        } else if !pressing, pointerIsDown {
+            sendPointer(phase: PointerEvent.ended, fit: fit, point: point)
+            pointerIsDown = false
+            sendPointer(phase: PointerEvent.hover, fit: fit, point: point)
+        } else if pointerIsDown {
+            sendPointer(phase: PointerEvent.moved, fit: fit, point: point)
+        } else {
+            sendPointer(phase: PointerEvent.hover, fit: fit, point: point)
+        }
+    }
+
+    func releaseControl() {
+        guard pointerIsDown || controlCursor != nil || !controlPoints.isEmpty else { return }
+        if pointerIsDown, let model {
+            let fit = drawingRect(for: model)
+            let point = controlCursor ?? .zero
+            sendPointer(phase: PointerEvent.ended, fit: fit, point: point)
+        }
+        pointerIsDown = false
+        controlPoints.removeAll()
+        scrollCentroid = nil
+        controlCursor = nil
+        setNeedsDisplay()
+    }
+
+    private func sendPointer(phase: UInt8, fit: CGRect, point: CGPoint, dx: CGFloat = 0, dy: CGFloat = 0) {
+        let x = min(1, max(0, (point.x - fit.minX) / fit.width))
+        let y = min(1, max(0, (point.y - fit.minY) / fit.height))
+        model?.sendPointer(phase: phase, x: x, y: y, dx: dx, dy: dy)
     }
 
     private func append(_ touches: Set<UITouch>, event: UIEvent?, phase: StrokePhase) {

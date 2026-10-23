@@ -22,6 +22,8 @@ struct FloatingToolbar: View {
     var showsMacScreen: Binding<Bool>? = nil
     /// 맥 화면 위 필기·상자를 지우지 않고 잠깐 숨긴다. nil이면 버튼을 그리지 않는다.
     var showsMacInk: Binding<Bool>? = nil
+    /// 켜면 아이패드 터치로 맥을 클릭하고 스크롤한다. nil이면 버튼을 그리지 않는다.
+    var controlsMac: Binding<Bool>? = nil
     var onDisconnect: (() -> Void)? = nil
     /// 맥 연결 화면은 사진 선택·저장·내보내기를 쓰지 않는다.
     var showsPhotoActions: Bool = true
@@ -122,6 +124,24 @@ struct FloatingToolbar: View {
                     }
                     .buttonStyle(.plain)
                     .accessibilityLabel(screenOn ? "맥 화면 끄기" : "맥 화면 켜기")
+                }
+
+                if let controlsMac {
+                    let controlling = controlsMac.wrappedValue
+                    Button {
+                        controlsMac.wrappedValue.toggle()
+                    } label: {
+                        Image(systemName: "cursorarrow")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(Color.primary)
+                            .frame(width: buttonSide, height: buttonSide)
+                            .background(
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .fill(Color.primary.opacity(controlling ? 0.2 : 0.08))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(controlling ? "맥 조작 끄기" : "맥 조작 켜기")
                 }
 
                 if let showsMacInk {

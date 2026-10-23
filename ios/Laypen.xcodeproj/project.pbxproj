@@ -16,11 +16,13 @@
 		1053CFA4A946B88F27D84EED /* MacHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072E41233F6655A05050A032 /* MacHostView.swift */; };
 		19C030A073ABBD313A71522D /* ToolSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */; };
 		2D8F611CC3186D7A42CF4D88 /* EdgeSnappingDraggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */; };
+		307DE4E4AC421BE1A22CAB68 /* MacPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521DED78C3A58C2FB40AAD44 /* MacPointer.swift */; };
 		36AD9179A99E38738E56B2C1 /* StrokeStraightener.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */; };
 		3A58CCFA864AFF9B8FF7589C /* DrawingCanvasView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1E35FE93494FEC32998312B /* DrawingCanvasView.swift */; };
 		3C5BC818D5A9CD7C24717529 /* AnnotationExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = BF2059746C151860ABE2A40C /* AnnotationExporter.swift */; };
 		3D6C3A63DA2D986ABAD3CEF4 /* WhiteRectShape.swift in Sources */ = {isa = PBXBuildFile; fileRef = 24FC3C8B5BB25B30825F2304 /* WhiteRectShape.swift */; };
 		3FCC453ACAD03875FFF70AC3 /* ShareSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = C90088A744553C80895817A1 /* ShareSheet.swift */; };
+		42F8DC4BA4518ACF858E0AE7 /* LinkFrameDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB872D442500C7441CEA53A /* LinkFrameDecoder.swift */; };
 		45206BDC84F97C993815510E /* ToolSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */; };
 		482E677833FE08F2E76E81E9 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF0890947E173A5151615D1 /* SessionStore.swift */; };
 		4918C110B05520369A08AABD /* LinkTrustStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9681CCF5DEE3E9ADBBE3D0 /* LinkTrustStore.swift */; };
@@ -59,6 +61,7 @@
 		C9E3689CE362970179ADFB28 /* StrokeStraightener.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4A0673234B74312A9F2BE90 /* StrokeStraightener.swift */; };
 		CDF530A2748A6C50C16581ED /* ScreenSender.swift in Sources */ = {isa = PBXBuildFile; fileRef = 27CE52E5968A6C88C6DEDEC1 /* ScreenSender.swift */; };
 		CEA83171DBA4DBE4AA047A48 /* ColorContrast.swift in Sources */ = {isa = PBXBuildFile; fileRef = CCD4AEBCDB3976B6FEDBF168 /* ColorContrast.swift */; };
+		D8B9C7FD1C5D0BC5FCA9C70B /* LinkFrameDecoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 1EB872D442500C7441CEA53A /* LinkFrameDecoder.swift */; };
 		DD8F837A7AB086EC865E34FC /* CanvasViewport.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */; };
 		DF160802D171A00CD6CEA2DB /* WhiteboardLayer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 55490695088C3B2A1031A58F /* WhiteboardLayer.swift */; };
 		F0833B67DFFB832CECC9732E /* DrawingSessionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DF1BFF42C75930454327BB7C /* DrawingSessionModel.swift */; };
@@ -100,6 +103,7 @@
 		11B47277FAA3E3A98A4B7243 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FloatingToolbar.swift; sourceTree = "<group>"; };
 		190B600ED372BCF3D974E84A /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		1EB872D442500C7441CEA53A /* LinkFrameDecoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkFrameDecoder.swift; sourceTree = "<group>"; };
 		24FC3C8B5BB25B30825F2304 /* WhiteRectShape.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteRectShape.swift; sourceTree = "<group>"; };
 		27CE52E5968A6C88C6DEDEC1 /* ScreenSender.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenSender.swift; sourceTree = "<group>"; };
 		2C5DABF6C52CD5114D2FFD95 /* ShareHandoff.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareHandoff.swift; sourceTree = "<group>"; };
@@ -110,6 +114,7 @@
 		4750492DECBBE167E541E527 /* LaypenMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = LaypenMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		4978DCDCA55AA604E091A760 /* ShareViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShareViewController.swift; sourceTree = "<group>"; };
 		4B9681CCF5DEE3E9ADBBE3D0 /* LinkTrustStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkTrustStore.swift; sourceTree = "<group>"; };
+		521DED78C3A58C2FB40AAD44 /* MacPointer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacPointer.swift; sourceTree = "<group>"; };
 		55490695088C3B2A1031A58F /* WhiteboardLayer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WhiteboardLayer.swift; sourceTree = "<group>"; };
 		57A5B660FFFBE5816A04D41B /* ShapeStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeStore.swift; sourceTree = "<group>"; };
 		7AB2A501B26E5251BF618332 /* LinkMessages.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkMessages.swift; sourceTree = "<group>"; };
@@ -159,6 +164,7 @@
 				91DD1891538B5B036F632489 /* LaypenMacApp.swift */,
 				072E41233F6655A05050A032 /* MacHostView.swift */,
 				0EDE2385397115BB603ED93B /* MacLinkHost.swift */,
+				521DED78C3A58C2FB40AAD44 /* MacPointer.swift */,
 				3759CB871AF48D77C6367EEE /* OverlayPanel.swift */,
 				27CE52E5968A6C88C6DEDEC1 /* ScreenSender.swift */,
 			);
@@ -169,6 +175,7 @@
 			isa = PBXGroup;
 			children = (
 				A2E555164A06F5E836036CD5 /* LinkChannel.swift */,
+				1EB872D442500C7441CEA53A /* LinkFrameDecoder.swift */,
 				7AB2A501B26E5251BF618332 /* LinkMessages.swift */,
 				4B9681CCF5DEE3E9ADBBE3D0 /* LinkTrustStore.swift */,
 			);
@@ -354,10 +361,12 @@
 			files = (
 				020D617C1C1765BA2CF146C9 /* LaypenMacApp.swift in Sources */,
 				F2518F44B6E5CE886D7D4E77 /* LinkChannel.swift in Sources */,
+				42F8DC4BA4518ACF858E0AE7 /* LinkFrameDecoder.swift in Sources */,
 				972184D4ACACB0AF527D050C /* LinkMessages.swift in Sources */,
 				4918C110B05520369A08AABD /* LinkTrustStore.swift in Sources */,
 				1053CFA4A946B88F27D84EED /* MacHostView.swift in Sources */,
 				7DAF600D0F683D5671874D2F /* MacLinkHost.swift in Sources */,
+				307DE4E4AC421BE1A22CAB68 /* MacPointer.swift in Sources */,
 				702C3FC831E555B302F05508 /* OverlayPanel.swift in Sources */,
 				CDF530A2748A6C50C16581ED /* ScreenSender.swift in Sources */,
 			);
@@ -407,6 +416,7 @@
 				80403041B7B728E06311C34A /* FloatingToolbar.swift in Sources */,
 				F2A81C45598A9FB03983C9C3 /* LaypenApp.swift in Sources */,
 				7FC1D088AC55E0AA75BF56AC /* LinkChannel.swift in Sources */,
+				D8B9C7FD1C5D0BC5FCA9C70B /* LinkFrameDecoder.swift in Sources */,
 				4BB91C6B5ACC7FCA2D4D0167 /* LinkMessages.swift in Sources */,
 				9793CFB5DE5FD3219CC3E8A6 /* LinkTrustStore.swift in Sources */,
 				BD63ABD42C2FE07B75B7CDAF /* MacLinkModel.swift in Sources */,

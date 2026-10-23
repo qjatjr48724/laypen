@@ -27,6 +27,57 @@ enum LinkMessageKind: UInt8 {
     case boxes = 10
     case clearAll = 11
     case overlayVisible = 12
+    case pointer = 13
+}
+
+struct PointerEvent {
+    static let began: UInt8 = 1
+    static let moved: UInt8 = 2
+    static let ended: UInt8 = 3
+    static let cancelled: UInt8 = 4
+    static let scroll: UInt8 = 5
+    /// 버튼을 누르지 않고 커서만 옮긴다.
+    static let hover: UInt8 = 6
+
+    var phase: UInt8
+    var x: Float
+    var y: Float
+    var dx: Float
+    var dy: Float
+
+    var payload: Data {
+        var data = Data(capacity: 17)
+        data.append(phase)
+        for value in [x, y, dx, dy] {
+            var bits = value.bitPattern.bigEndian
+            withUnsafeBytes(of: &bits) { data.append(contentsOf: $0) }
+        }
+        return data
+    }
+
+    init(phase: UInt8, x: Float, y: Float, dx: Float = 0, dy: Float = 0) {
+        self.phase = phase
+        self.x = x
+        self.y = y
+        self.dx = dx
+        self.dy = dy
+    }
+
+    init?(data: Data) {
+        guard data.count >= 17 else { return nil }
+        phase = data[data.startIndex]
+        var offset = 1
+        func read() -> Float {
+            let start = data.index(data.startIndex, offsetBy: offset)
+            offset += 4
+            let raw = data[start..<data.index(start, offsetBy: 4)].reduce(UInt32(0)) { ($0 << 8) | UInt32($1) }
+            return Float(bitPattern: raw)
+        }
+        x = read()
+        y = read()
+        dx = read()
+        dy = read()
+    }
 }
 
 struct LinkHello: Codable, Equatable {

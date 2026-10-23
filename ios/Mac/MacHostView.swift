@@ -25,6 +25,12 @@ struct MacHostView: View {
                     .foregroundStyle(.orange)
                 Button("화면 기록 설정 열기", action: host.openCaptureSettings)
             }
+            if let controlWarning = host.controlWarning {
+                Text(controlWarning)
+                    .font(.callout)
+                    .foregroundStyle(.orange)
+                Button("손쉬운 사용 설정 열기", action: host.openControlSettings)
+            }
             HStack {
                 Button("코드 새로 만들기", action: host.regenerateCode)
                     .disabled(host.isConnected)

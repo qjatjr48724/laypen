@@ -30,6 +30,8 @@
 	<string>NSApplication</string>
 	<key>NSScreenCaptureUsageDescription</key>
 	<string>아이패드에 맥 화면을 보여 주려면 화면 기록이 필요합니다. 화면은 맥과 아이패드 사이에서만 전송됩니다.</string>
+	<key>NSAccessibilityUsageDescription</key>
+	<string>아이패드에서 맥 화면을 누르고 스크롤하려면 손쉬운 사용 권한이 필요합니다.</string>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>주변의 아이패드와 연결하려면 로컬 네트워크가 필요합니다.</string>
 	<key>NSBonjourServices</key>

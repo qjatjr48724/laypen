@@ -27,6 +27,8 @@ final class MacLinkModel: ObservableObject {
     @Published private(set) var canUndo = false
     @Published private(set) var canRedo = false
     @Published var code = ""
+    /// 저장된 연결이 거절되면 코드 칸을 다시 연다.
+    @Published var asksForCode = false
     @Published var selectedID: NWEndpoint?
     @Published var settings = ToolSettings()
     @Published var showsMacScreen = true
@@ -35,6 +37,8 @@ final class MacLinkModel: ObservableObject {
     @Published var showClearConfirm = false
     @Published var showClearInkConfirm = false
     @Published var isPlacingWhiteRect = false
+    /// 켜면 아이패드 터치가 맥의 클릭·드래그·스크롤이 된다.
+    @Published var controlsMac = false
 
     private(set) var image: UIImage?
     private(set) var ink = LinkInk()
@@ -45,6 +49,10 @@ final class MacLinkModel: ObservableObject {
     private var browser: NWBrowser?
     private var channel: LinkChannel?
     private let queue = DispatchQueue(label: "laypen.link.browser")
+    private let frameQueue = DispatchQueue(label: "laypen.link.frames")
+    private let frameDecoder = LinkFrameDecoder()
+    private var pendingFrames: [Data] = []
+    private var isDecodingFrame = false
 
     init(settings: ToolSettings = ToolSettings()) {
         self.settings = settings
@@ -99,7 +107,8 @@ final class MacLinkModel: ObservableObject {
         guard channel == nil, let mac = selectedMac else { return }
         pendingPeerName = mac.name
         let saved = mac.savedToken
-        if saved.isEmpty, code.count != 4 { return }
+        let typingCode = asksForCode || saved.isEmpty
+        if typingCode, code.count != 4 { return }
         let connection = NWConnection(to: mac.endpoint, using: LinkService.parameters())
         let channel = LinkChannel(connection)
         channel.onMessage = { [weak self] kind, payload in
@@ -115,10 +124,10 @@ final class MacLinkModel: ObservableObject {
         status = "연결하는 중"
         channel.start()
         let hello = LinkHello(
-            code: saved.isEmpty ? code : "",
+            code: typingCode ? code : "",
             name: UIDevice.current.name,
             peerID: LinkTrustStore.localID,
-            token: saved
+            token: typingCode ? "" : saved
         )
         if let data = try? JSONEncoder().encode(hello) {
             channel.send(kind: .hello, payload: data)
@@ -172,6 +181,25 @@ final class MacLinkModel: ObservableObject {
 
     func finishBoxPlacement() {
         isPlacingWhiteRect = false
+    }
+
+    func setControlsMac(_ enabled: Bool) {
+        controlsMac = enabled
+        if enabled, isPlacingWhiteRect {
+            isPlacingWhiteRect = false
+            settings.isDrawingEnabled = true
+        }
+    }
+
+    func sendPointer(phase: UInt8, x: CGFloat, y: CGFloat, dx: CGFloat = 0, dy: CGFloat = 0) {
+        let event = PointerEvent(
+            phase: phase,
+            x: Float(x),
+            y: Float(y),
+            dx: Float(dx),
+            dy: Float(dy)
+        )
+        channel?.send(kind: .pointer, payload: event.payload)
     }
 
     func setBoxes(_ boxes: [LinkBox], send: Bool) {
@@ -232,33 +260,69 @@ final class MacLinkModel: ObservableObject {
                     LinkTrustStore.save(token: trust.token, for: trust.macID, name: name)
                     self.noteTrustedMac(id: trust.macID, name: name)
                 }
+                self.asksForCode = false
                 self.isConnected = true
                 self.status = "연결됨"
                 self.sendInkVisibility()
             }
         case .reject:
             DispatchQueue.main.async {
-                if let macID = self.selectedMac?.macID {
-                    LinkTrustStore.remove(macID)
-                }
+                self.forgetSelectedTrust()
+                self.asksForCode = true
+                self.code = ""
                 self.channel?.cancel()
-                self.handleDisconnect(message: "코드가 맞지 않습니다.")
+                self.handleDisconnect(message: "저장된 연결이 맞지 않습니다. 맥에 표시된 코드를 입력하세요.")
             }
         case .frame:
-            guard let image = UIImage(data: payload) else { return }
-            DispatchQueue.main.async {
-                guard self.isConnected else { return }
-                self.image = image
-                self.onCanvasChange?()
-            }
+            enqueueFrame(payload)
         case .clear:
             DispatchQueue.main.async {
                 self.ink.clear()
                 self.publishInk()
             }
-        case .hello, .stroke, .undo, .redo, .replaceStroke, .boxes, .clearAll, .overlayVisible:
+        case .hello, .stroke, .undo, .redo, .replaceStroke, .boxes, .clearAll, .overlayVisible, .pointer:
             break
         }
+    }
+
+    func requestCodeEntry() {
+        asksForCode = true
+        code = ""
+        status = "맥에 표시된 코드를 입력하세요."
+    }
+
+    private func forgetSelectedTrust() {
+        if let name = selectedMac?.name {
+            LinkTrustStore.remove(named: name)
+        }
+        if let macID = selectedMac?.macID {
+            LinkTrustStore.remove(macID)
+        }
+    }
+
+    private func enqueueFrame(_ data: Data) {
+        frameQueue.async { [weak self] in
+            guard let self else { return }
+            self.pendingFrames.append(data)
+            self.decodeQueuedFrames()
+        }
+    }
+
+    private func decodeQueuedFrames() {
+        guard !isDecodingFrame else { return }
+        isDecodingFrame = true
+        while !pendingFrames.isEmpty {
+            let data = pendingFrames.removeFirst()
+            let image = frameDecoder.image(from: data)
+            if let image {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self, self.isConnected else { return }
+                    self.image = UIImage(cgImage: image)
+                    self.onCanvasChange?()
+                }
+            }
+        }
+        isDecodingFrame = false
     }
 
     func sendInkVisibility() {
@@ -272,6 +336,10 @@ final class MacLinkModel: ObservableObject {
         ink = LinkInk()
         boxes = []
         isPlacingWhiteRect = false
+        frameQueue.async { [weak self] in
+            self?.pendingFrames.removeAll()
+            self?.frameDecoder.reset()
+        }
         publishInk()
         status = message
     }

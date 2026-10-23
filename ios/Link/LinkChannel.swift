@@ -10,7 +10,8 @@ final class LinkChannel {
     private let queue = DispatchQueue(label: "laypen.link.channel")
     private var framer = LinkFramer()
     private var pending: [Data] = []
-    private var latestFrame: Data?
+    private var frames: [(packet: Data, flush: (() -> Void)?)] = []
+    private var inflightFlush: (() -> Void)?
     private var isSending = false
     private var isReady = false
     private var didEnd = false
@@ -38,12 +39,16 @@ final class LinkChannel {
         connection.start(queue: queue)
     }
 
-    func send(kind: LinkMessageKind, payload: Data) {
+    func send(kind: LinkMessageKind, payload: Data, onFlushed: (() -> Void)? = nil) {
         let packet = LinkCodec.encode(kind: kind, payload: payload)
         queue.async { [weak self] in
-            guard let self, !self.didEnd else { return }
+            guard let self else { return }
+            guard !self.didEnd else {
+                onFlushed?()
+                return
+            }
             if kind == .frame {
-                self.latestFrame = packet
+                self.frames.append((packet, onFlushed))
             } else {
                 self.pending.append(packet)
             }
@@ -60,19 +65,25 @@ final class LinkChannel {
     private func pump() {
         guard isReady, !isSending else { return }
         let packet: Data
+        var flush: (() -> Void)?
         if !pending.isEmpty {
             packet = pending.removeFirst()
-        } else if let frame = latestFrame {
-            latestFrame = nil
-            packet = frame
+        } else if !frames.isEmpty {
+            let frame = frames.removeFirst()
+            packet = frame.packet
+            flush = frame.flush
         } else {
             return
         }
         isSending = true
+        inflightFlush = flush
         connection.send(content: packet, completion: .contentProcessed { [weak self] error in
             self?.queue.async {
                 guard let self else { return }
+                let done = self.inflightFlush
+                self.inflightFlush = nil
                 self.isSending = false
+                done?()
                 if let error {
                     self.finish(error)
                     return
@@ -104,7 +115,12 @@ final class LinkChannel {
         didEnd = true
         isReady = false
         pending.removeAll()
-        latestFrame = nil
+        let waiting = frames.map(\.flush)
+        frames.removeAll()
+        let inflight = inflightFlush
+        inflightFlush = nil
+        waiting.forEach { $0?() }
+        inflight?()
         onEnded?(error)
     }
 }
