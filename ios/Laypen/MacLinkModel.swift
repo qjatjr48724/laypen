@@ -32,7 +32,7 @@ final class MacLinkModel: ObservableObject {
     @Published var selectedID: NWEndpoint?
     @Published var settings = ToolSettings()
     @Published var showsMacScreen = true
-    /// 맥 화면 위 필기와 상자를 보여 준다. 끄면 데이터는 남기고 오버레이만 접는다.
+    /// 필기와 상자를 보여 준다. 끄면 데이터는 남기고 맥 오버레이와 아이패드 화면에서 모두 숨긴다.
     @Published var showsMacInk = true
     @Published var showClearConfirm = false
     @Published var showClearInkConfirm = false
@@ -44,6 +44,7 @@ final class MacLinkModel: ObservableObject {
     private(set) var ink = LinkInk()
     private(set) var boxes: [LinkBox] = []
     var onCanvasChange: (() -> Void)?
+    var onInkEdited: (() -> Void)?
 
     private var pendingPeerName: String?
     private var browser: NWBrowser?
@@ -151,6 +152,7 @@ final class MacLinkModel: ObservableObject {
         guard ink.canUndo else { return }
         ink.undo()
         publishInk()
+        onInkEdited?()
         channel?.send(kind: .undo, payload: Data())
     }
 
@@ -158,6 +160,7 @@ final class MacLinkModel: ObservableObject {
         guard ink.canRedo else { return }
         ink.redo()
         publishInk()
+        onInkEdited?()
         channel?.send(kind: .redo, payload: Data())
     }
 
@@ -185,9 +188,14 @@ final class MacLinkModel: ObservableObject {
 
     func setControlsMac(_ enabled: Bool) {
         controlsMac = enabled
-        if enabled, isPlacingWhiteRect {
-            isPlacingWhiteRect = false
-            settings.isDrawingEnabled = true
+        if enabled {
+            if isPlacingWhiteRect {
+                isPlacingWhiteRect = false
+                settings.isDrawingEnabled = true
+            }
+            if settings.selectedTool == .selection {
+                settings.selectTool(settings.resolvedLastInkTool)
+            }
         }
     }
 
@@ -209,10 +217,18 @@ final class MacLinkModel: ObservableObject {
         channel?.send(kind: .boxes, payload: data)
     }
 
+    func replaceInk(_ strokes: [LinkStroke]) {
+        ink.replaceAll(strokes)
+        publishInk()
+        guard let data = try? JSONEncoder().encode(strokes.map(LinkStrokeWire.init)) else { return }
+        channel?.send(kind: .replaceInk, payload: data)
+    }
+
     func clearInk() {
         guard !ink.strokes.isEmpty else { return }
         ink.clear()
         publishInk()
+        onInkEdited?()
         channel?.send(kind: .clear, payload: Data())
     }
 
@@ -225,6 +241,7 @@ final class MacLinkModel: ObservableObject {
         }
         boxes = []
         publishInk()
+        onInkEdited?()
         channel?.send(kind: .clearAll, payload: Data())
     }
 
@@ -280,7 +297,7 @@ final class MacLinkModel: ObservableObject {
                 self.ink.clear()
                 self.publishInk()
             }
-        case .hello, .stroke, .undo, .redo, .replaceStroke, .boxes, .clearAll, .overlayVisible, .pointer:
+        case .hello, .stroke, .undo, .redo, .replaceStroke, .boxes, .clearAll, .overlayVisible, .pointer, .replaceInk:
             break
         }
     }

@@ -33,7 +33,6 @@ struct FloatingToolbar: View {
     private let palette = ["#E53935", "#1E88E5", "#43A047", "#FB8C00", "#8E24AA", "#111111"]
     private let buttonSide: CGFloat = 30
     private let menuWidth: CGFloat = 200
-    private let chromeHeight: CGFloat = 52
     @State private var didCopyHex = false
     @State private var showShortcutsGuide = false
     @State private var menuContentHeight: CGFloat = 0
@@ -43,6 +42,15 @@ struct FloatingToolbar: View {
     /// 페이드만 담당. 레이아웃(폭) 변화는 애니메이션 없이 해서 버튼이 옆으로 안 밀리게 한다.
     @State private var menuFadedIn = false
     @State private var menuToggleTask: Task<Void, Never>?
+
+    /// 맥 연결 화면은 접힌 버튼이 두 줄이라 크롬이 더 높다.
+    private var showsCollapsedMacRow: Bool {
+        showsMacScreen != nil || controlsMac != nil || showsMacInk != nil
+    }
+
+    private var chromeHeight: CGFloat {
+        showsCollapsedMacRow ? 88 : 52
+    }
 
     private var menuMaxHeight: CGFloat {
         // 접기/ON 크롬 + 패딩을 빼고, Split View에서도 스크롤로 전부 닿게 한다.
@@ -59,106 +67,113 @@ struct FloatingToolbar: View {
 
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
-            // 접기/ON을 위에 고정 — 창이 작아져도 항상 보이게
-            HStack(spacing: 5) {
-                Button {
-                    toggleMenu()
-                } label: {
-                    Image(systemName: "pencil.tip.crop.circle")
-                        .font(.subheadline.weight(.semibold))
-                        .frame(width: buttonSide, height: buttonSide)
-                }
-                .buttonStyle(.borderedProminent)
-                .controlSize(.small)
-
-                // 메뉴를 열지 않고 지우개 ↔ 직전 펜 전환
-                Button {
-                    settings.toggleEraserWithLastInk()
-                } label: {
-                    Image(systemName: quickToolSwapSystemImage)
-                        .font(.subheadline.weight(.semibold))
-                        .foregroundStyle(quickToolSwapForeground)
-                        .frame(width: buttonSide, height: buttonSide)
-                        .background(quickToolSwapBackground, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(settings.isEraserSelected ? "이전 펜으로 전환" : "지우개로 전환")
-
-                Button {
-                    settings.isDrawingEnabled.toggle()
-                } label: {
-                    HStack(spacing: 3) {
-                        Image(systemName: settings.isDrawingEnabled ? "pencil" : "pencil.slash")
-                            .font(.caption2.weight(.semibold))
-                        Text(settings.isDrawingEnabled ? "ON" : "OFF")
-                            .font(.caption2.bold())
-                    }
-                    .foregroundStyle(onOffForeground)
-                    .frame(minWidth: 50, minHeight: buttonSide)
-                    .padding(.horizontal, 5)
-                    .background(onOffBackground, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
-                }
-                .buttonStyle(.plain)
-
-                if let showsMacScreen {
-                    let screenOn = showsMacScreen.wrappedValue
+            // 접기/ON을 위에 고정 — 창이 작아져도 항상 보이게.
+            // 맥 버튼까지 한 줄로 두면 가로가 벌어지므로 두 줄로 나눈다.
+            VStack(alignment: .trailing, spacing: 5) {
+                HStack(spacing: 5) {
                     Button {
-                        showsMacScreen.wrappedValue.toggle()
+                        toggleMenu()
                     } label: {
-                        Image(systemName: "macwindow")
-                            .font(.caption2.weight(.semibold))
-                            .overlay {
-                                if !screenOn {
-                                    Rectangle()
-                                        .fill(Color.primary)
-                                        .frame(width: 1.5, height: 16)
-                                        .rotationEffect(.degrees(-42))
-                                }
+                        Image(systemName: "pencil.tip.crop.circle")
+                            .font(.subheadline.weight(.semibold))
+                            .frame(width: buttonSide, height: buttonSide)
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .controlSize(.small)
+
+                    // 메뉴를 열지 않고 지우개 ↔ 직전 펜 전환
+                    Button {
+                        settings.toggleEraserWithLastInk()
+                    } label: {
+                        Image(systemName: quickToolSwapSystemImage)
+                            .font(.subheadline.weight(.semibold))
+                            .foregroundStyle(quickToolSwapForeground)
+                            .frame(width: buttonSide, height: buttonSide)
+                            .background(quickToolSwapBackground, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                    .accessibilityLabel(settings.isEraserSelected ? "이전 펜으로 전환" : "지우개로 전환")
+
+                    Button {
+                        settings.isDrawingEnabled.toggle()
+                    } label: {
+                        HStack(spacing: 3) {
+                            Image(systemName: settings.isDrawingEnabled ? "pencil" : "pencil.slash")
+                                .font(.caption2.weight(.semibold))
+                            Text(settings.isDrawingEnabled ? "ON" : "OFF")
+                                .font(.caption2.bold())
+                        }
+                        .foregroundStyle(onOffForeground)
+                        .frame(minWidth: 50, minHeight: buttonSide)
+                        .padding(.horizontal, 5)
+                        .background(onOffBackground, in: RoundedRectangle(cornerRadius: 7, style: .continuous))
+                    }
+                    .buttonStyle(.plain)
+                }
+
+                if showsCollapsedMacRow {
+                    HStack(spacing: 5) {
+                        if let showsMacScreen {
+                            let screenOn = showsMacScreen.wrappedValue
+                            Button {
+                                showsMacScreen.wrappedValue.toggle()
+                            } label: {
+                                Image(systemName: "macwindow")
+                                    .font(.caption2.weight(.semibold))
+                                    .overlay {
+                                        if !screenOn {
+                                            Rectangle()
+                                                .fill(Color.primary)
+                                                .frame(width: 1.5, height: 16)
+                                                .rotationEffect(.degrees(-42))
+                                        }
+                                    }
+                                    .foregroundStyle(Color.primary)
+                                    .frame(width: buttonSide, height: buttonSide)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                            .fill(Color.primary.opacity(screenOn ? 0.08 : 0.16))
+                                    )
                             }
-                            .foregroundStyle(Color.primary)
-                            .frame(width: buttonSide, height: buttonSide)
-                            .background(
-                                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                    .fill(Color.primary.opacity(screenOn ? 0.08 : 0.16))
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(screenOn ? "맥 화면 끄기" : "맥 화면 켜기")
-                }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(screenOn ? "맥 화면 끄기" : "맥 화면 켜기")
+                        }
 
-                if let controlsMac {
-                    let controlling = controlsMac.wrappedValue
-                    Button {
-                        controlsMac.wrappedValue.toggle()
-                    } label: {
-                        Image(systemName: "cursorarrow")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(Color.primary)
-                            .frame(width: buttonSide, height: buttonSide)
-                            .background(
-                                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                    .fill(Color.primary.opacity(controlling ? 0.2 : 0.08))
-                            )
-                    }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(controlling ? "맥 조작 끄기" : "맥 조작 켜기")
-                }
+                        if let controlsMac {
+                            let controlling = controlsMac.wrappedValue
+                            Button {
+                                controlsMac.wrappedValue.toggle()
+                            } label: {
+                                Image(systemName: "cursorarrow")
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(Color.primary)
+                                    .frame(width: buttonSide, height: buttonSide)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                            .fill(Color.primary.opacity(controlling ? 0.2 : 0.08))
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(controlling ? "맥 조작 끄기" : "맥 조작 켜기")
+                        }
 
-                if let showsMacInk {
-                    Button {
-                        showsMacInk.wrappedValue.toggle()
-                    } label: {
-                        Image(systemName: showsMacInk.wrappedValue ? "eye" : "eye.slash")
-                            .font(.caption2.weight(.semibold))
-                            .foregroundStyle(showsMacInk.wrappedValue ? Color.primary : Color.secondary)
-                            .frame(width: buttonSide, height: buttonSide)
-                            .background(
-                                RoundedRectangle(cornerRadius: 7, style: .continuous)
-                                    .fill(Color.primary.opacity(showsMacInk.wrappedValue ? 0.08 : 0.16))
-                            )
+                        if let showsMacInk {
+                            Button {
+                                showsMacInk.wrappedValue.toggle()
+                            } label: {
+                                Image(systemName: showsMacInk.wrappedValue ? "eye" : "eye.slash")
+                                    .font(.caption2.weight(.semibold))
+                                    .foregroundStyle(showsMacInk.wrappedValue ? Color.primary : Color.secondary)
+                                    .frame(width: buttonSide, height: buttonSide)
+                                    .background(
+                                        RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                            .fill(Color.primary.opacity(showsMacInk.wrappedValue ? 0.08 : 0.16))
+                                    )
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(showsMacInk.wrappedValue ? "필기 숨기기" : "필기 보기")
+                        }
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(showsMacInk.wrappedValue ? "맥 위 필기 숨기기" : "맥 위 필기 보기")
                 }
             }
 
@@ -312,6 +327,7 @@ struct FloatingToolbar: View {
         case .colorPen: return Color(hex: settings.colorPenColorHex)
         case .highlighter: return Color(hex: settings.highlighterColorHex)
         case .eraser: return Color.gray.opacity(0.85)
+        case .selection: return Color.accentColor
         }
     }
 
@@ -333,7 +349,7 @@ struct FloatingToolbar: View {
             case .blackPen: return .solidBlack
             case .colorPen: return Color(hex: settings.colorPenColorHex)
             case .highlighter: return Color(hex: settings.highlighterColorHex)
-            case .eraser: return Color.gray.opacity(0.85)
+            case .eraser, .selection: return Color.gray.opacity(0.85)
             }
         }
         return Color.gray.opacity(0.85)
@@ -368,16 +384,20 @@ struct FloatingToolbar: View {
                 }
             }
 
-            Divider()
+            if settings.selectedTool != .selection {
+                Divider()
 
-            Text("굵기 / 크기")
-                .font(.caption2)
-                .foregroundStyle(.secondary)
-            Slider(
-                value: widthBinding,
-                in: eraserOrHighlighterWidthRange
-            )
-            .controlSize(.small)
+                Text("굵기 / 크기")
+                    .font(.caption2)
+                    .foregroundStyle(.secondary)
+                Slider(
+                    value: widthBinding,
+                    in: eraserOrHighlighterWidthRange
+                )
+                .controlSize(.mini)
+                .padding(.horizontal, 12)
+                .scaleEffect(0.9, anchor: .center)
+            }
 
             if settings.selectedTool == .colorPen || settings.selectedTool == .highlighter {
                 Text("색상")
@@ -714,6 +734,7 @@ struct FloatingToolbar: View {
             case .colorPen: return Color(hex: settings.colorPenColorHex)
             case .highlighter: return Color(hex: settings.highlighterColorHex)
             case .eraser: return Color.gray.opacity(0.85)
+            case .selection: return Color.accentColor
             }
         }()
         return selected ? base : base.opacity(0.72)

@@ -28,6 +28,7 @@ enum LinkMessageKind: UInt8 {
     case clearAll = 11
     case overlayVisible = 12
     case pointer = 13
+    case replaceInk = 14
 }
 
 struct PointerEvent {
@@ -114,6 +115,35 @@ struct LinkStroke: Codable, Equatable {
     var alpha: Double
     var widthFraction: Double
     var isEraser: Bool
+
+    func intersects(_ rect: CGRect) -> Bool {
+        guard !points.isEmpty else { return false }
+        let area = rect.insetBy(dx: -widthFraction * 0.5, dy: -widthFraction * 0.5)
+        if points.contains(where: { area.contains($0) }) { return true }
+        guard points.count > 1 else { return false }
+        for index in 0..<(points.count - 1) where Self.segmentHits(points[index], points[index + 1], area) {
+            return true
+        }
+        return false
+    }
+
+    private static func segmentHits(_ a: CGPoint, _ b: CGPoint, _ rect: CGRect) -> Bool {
+        if rect.contains(a) || rect.contains(b) { return true }
+        let edges = [
+            (CGPoint(x: rect.minX, y: rect.minY), CGPoint(x: rect.maxX, y: rect.minY)),
+            (CGPoint(x: rect.maxX, y: rect.minY), CGPoint(x: rect.maxX, y: rect.maxY)),
+            (CGPoint(x: rect.maxX, y: rect.maxY), CGPoint(x: rect.minX, y: rect.maxY)),
+            (CGPoint(x: rect.minX, y: rect.maxY), CGPoint(x: rect.minX, y: rect.minY))
+        ]
+        return edges.contains { segmentsCross(a, b, $0.0, $0.1) }
+    }
+
+    private static func segmentsCross(_ a: CGPoint, _ b: CGPoint, _ c: CGPoint, _ d: CGPoint) -> Bool {
+        func cross(_ p: CGPoint, _ q: CGPoint, _ r: CGPoint) -> CGFloat {
+            (q.x - p.x) * (r.y - p.y) - (q.y - p.y) * (r.x - p.x)
+        }
+        return cross(c, d, a) * cross(c, d, b) < 0 && cross(a, b, c) * cross(a, b, d) < 0
+    }
 }
 
 /// 맥과 아이패드가 같은 JSON으로 주고받는 획. CGPoint 인코딩 차이에 기대지 않는다.
@@ -188,6 +218,13 @@ struct LinkInk: Equatable {
     mutating func replaceLast(_ stroke: LinkStroke) {
         guard !strokes.isEmpty else { return }
         strokes[strokes.count - 1] = stroke
+    }
+
+    mutating func replaceAll(_ next: [LinkStroke]) {
+        guard next != strokes else { return }
+        pushUndo()
+        redoStack.removeAll()
+        strokes = next
     }
 
     mutating func undo() {

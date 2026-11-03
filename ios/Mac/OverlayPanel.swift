@@ -58,6 +58,10 @@ final class OverlayPanel {
         canvas.replaceLast(stroke)
     }
 
+    func replaceInk(_ strokes: [LinkStroke]) {
+        canvas.replaceInk(strokes)
+    }
+
     func setBoxes(_ boxes: [LinkBox]) {
         canvas.setBoxes(boxes)
     }
@@ -123,6 +127,11 @@ final class OverlayCanvasView: NSView {
 
     func replaceLast(_ stroke: LinkStroke) {
         ink.replaceLast(stroke)
+        needsDisplay = true
+    }
+
+    func replaceInk(_ strokes: [LinkStroke]) {
+        ink.replaceAll(strokes)
         needsDisplay = true
     }
 

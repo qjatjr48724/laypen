@@ -452,7 +452,11 @@
 				CODE_SIGN_ENTITLEMENTS = LaypenShare/LaypenShare.entitlements;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LaypenShare/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.app.share;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -669,7 +673,11 @@
 				CODE_SIGN_ENTITLEMENTS = LaypenShare/LaypenShare.entitlements;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LaypenShare/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.app.share;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

@@ -35,13 +35,8 @@ final class ScreenSender: NSObject, SCStreamOutput, SCStreamDelegate {
             throw ScreenSenderError.noDisplay
         }
 
-        let bundleID = Bundle.main.bundleIdentifier
-        let excluded = content.applications.filter { $0.bundleIdentifier == bundleID }
-        let filter = SCContentFilter(
-            display: display,
-            excludingApplications: excluded,
-            exceptingWindows: []
-        )
+        // 필기 오버레이는 sharingType .none 이라 캡처에 들어가지 않는다. 코드 창은 남긴다.
+        let filter = SCContentFilter(display: display, excludingWindows: [])
 
         let configuration = SCStreamConfiguration()
         let fitted = Self.fittedSize(width: display.width, height: display.height, maxSide: 1440)
@@ -116,6 +111,14 @@ final class ScreenSender: NSObject, SCStreamOutput, SCStreamDelegate {
     }
 
     func stream(_ stream: SCStream, didStopWithError error: Error) {
+        stateLock.lock()
+        let current = self.stream
+        if current === stream {
+            self.stream = nil
+        }
+        stateLock.unlock()
+        // stopCapture로 직접 끈 스트림은 여기서 다시 열지 않는다.
+        guard current === stream else { return }
         onStopped?(error.localizedDescription)
     }
 

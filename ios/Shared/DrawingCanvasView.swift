@@ -150,7 +150,7 @@ struct DrawingCanvasView: UIViewRepresentable {
 
         @objc private func handleDrawingGesture(_ gesture: UIGestureRecognizer) {
             guard parent.isDrawingEnabled else { return }
-            if parent.tool is PKEraserTool {
+            if parent.tool is PKEraserTool || parent.tool is PKLassoTool {
                 cancelHoldTimer()
                 return
             }

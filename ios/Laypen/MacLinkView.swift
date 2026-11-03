@@ -44,6 +44,16 @@ struct MacLinkView: View {
         .onChange(of: model.showsMacInk) { _, _ in
             model.sendInkVisibility()
         }
+        .onChange(of: model.settings.selectedTool) { _, tool in
+            guard tool == .selection else { return }
+            if model.controlsMac {
+                model.setControlsMac(false)
+            }
+            if model.isPlacingWhiteRect {
+                model.finishBoxPlacement()
+                model.settings.isDrawingEnabled = true
+            }
+        }
     }
 
     private var pairing: some View {
@@ -87,12 +97,18 @@ struct MacLinkView: View {
                 Text("이 맥은 저장되어 있어 코드 없이 연결됩니다.")
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
-                Button("코드 입력", action: model.requestCodeEntry)
-                    .buttonStyle(.bordered)
+                HStack {
+                    Spacer()
+                    Button("코드 입력", action: model.requestCodeEntry)
+                        .buttonStyle(.bordered)
+                }
             }
-            Button("연결", action: model.connect)
-                .buttonStyle(.borderedProminent)
-                .disabled(model.selectedID == nil || ((model.asksForCode || !model.selectedMacIsTrusted) && model.code.count != 4))
+            HStack {
+                Spacer()
+                Button("연결", action: model.connect)
+                    .buttonStyle(.borderedProminent)
+                    .disabled(model.selectedID == nil || ((model.asksForCode || !model.selectedMacIsTrusted) && model.code.count != 4))
+            }
             Spacer()
         }
         .padding(20)
@@ -149,6 +165,15 @@ struct MacLinkView: View {
                     .padding(.top, 12)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .allowsHitTesting(false)
+            } else if model.settings.selectedTool == .selection {
+                Text("드래그로 필기를 선택하고, 선택한 부분을 끌어서 옮깁니다")
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .padding(.top, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .allowsHitTesting(false)
             }
         }
         .background(Color.black)
@@ -181,12 +206,18 @@ struct MacLinkCanvas: UIViewRepresentable {
         if !model.controlsMac {
             uiView.releaseControl()
         }
+        if model.settings.selectedTool != .selection {
+            uiView.clearInkSelection()
+        }
     }
 
     private func bind(_ view: MacLinkCanvasView) {
         view.model = model
         model.onCanvasChange = { [weak view] in
             view?.setNeedsDisplay()
+        }
+        model.onInkEdited = { [weak view] in
+            view?.clearInkSelection()
         }
         view.setNeedsDisplay()
     }
@@ -218,6 +249,16 @@ final class MacLinkCanvasView: UIView {
     private var cachedInk: UIImage?
     private var cachedStrokes: [LinkStroke] = []
     private var cachedInkFit: CGRect = .zero
+    private var selectedStrokeIndices = IndexSet()
+    private var inkGesture: InkGesture?
+    private var selectionTouch: ObjectIdentifier?
+    private var marqueeRect: CGRect?
+    private var moveDelta = CGSize.zero
+
+    private enum InkGesture {
+        case marquee(start: CGPoint)
+        case moving(start: CGPoint)
+    }
 
     private enum BoxCorner: CaseIterable {
         case topLeading, topTrailing, bottomLeading, bottomTrailing
@@ -253,10 +294,17 @@ final class MacLinkCanvasView: UIView {
             UIColor(white: 0.86, alpha: 1).setFill()
             UIRectFill(bounds)
         }
-        drawBoxes(model, fit: fit)
-        inkLayer(model.ink.strokes, fit: fit)?.draw(in: bounds)
-        drawPlacementDraft()
-        drawTrash()
+        if model.showsMacInk {
+            drawBoxes(model, fit: fit)
+            if moveDelta != .zero, !selectedStrokeIndices.isEmpty {
+                renderInk(shiftedStrokes(model.ink.strokes, fit: fit), fit: fit)?.draw(in: bounds)
+            } else {
+                inkLayer(model.ink.strokes, fit: fit)?.draw(in: bounds)
+            }
+            drawPlacementDraft()
+            drawTrash()
+            drawInkSelection(fit: fit)
+        }
         if !model.showsMacScreen {
             let border = fit.insetBy(dx: 1, dy: 1)
             let path = UIBezierPath(rect: border)
@@ -329,6 +377,10 @@ final class MacLinkCanvasView: UIView {
             trackControl(touches, phase: .began)
             return
         }
+        if model.settings.selectedTool == .selection {
+            beginInkSelection(touches)
+            return
+        }
         if model.isPlacingWhiteRect {
             guard edit == nil, let touch = touches.first else { return }
             let point = touch.location(in: self)
@@ -351,6 +403,10 @@ final class MacLinkCanvasView: UIView {
             trackControl(touches, phase: .moved)
             return
         }
+        if model?.settings.selectedTool == .selection {
+            updateInkSelection(touches)
+            return
+        }
         if updateBoxEdit(touches) { return }
         append(touches, event: event, phase: .moved)
     }
@@ -360,6 +416,10 @@ final class MacLinkCanvasView: UIView {
             trackControl(touches, phase: .ended)
             return
         }
+        if model?.settings.selectedTool == .selection {
+            finishInkSelection(touches, commit: true)
+            return
+        }
         if finishBoxEdit(touches, commit: true) { return }
         append(touches, event: event, phase: .ended)
     }
@@ -367,6 +427,10 @@ final class MacLinkCanvasView: UIView {
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
         if model?.controlsMac == true {
             trackControl(touches, phase: .cancelled)
+            return
+        }
+        if model?.settings.selectedTool == .selection {
+            finishInkSelection(touches, commit: false)
             return
         }
         if finishBoxEdit(touches, commit: false) { return }
@@ -819,6 +883,152 @@ final class MacLinkCanvasView: UIView {
         return rect
     }
 
+    func clearInkSelection() {
+        guard inkGesture != nil || marqueeRect != nil || moveDelta != .zero || !selectedStrokeIndices.isEmpty else { return }
+        inkGesture = nil
+        selectionTouch = nil
+        marqueeRect = nil
+        moveDelta = .zero
+        selectedStrokeIndices = []
+        setNeedsDisplay()
+    }
+
+    private func beginInkSelection(_ touches: Set<UITouch>) {
+        guard inkGesture == nil, let touch = touches.first, let model else { return }
+        let point = touch.location(in: self)
+        selectionTouch = ObjectIdentifier(touch)
+        let fit = drawingRect(for: model)
+        if let bounds = selectionBounds(fit: fit), bounds.contains(point) {
+            inkGesture = .moving(start: point)
+            moveDelta = .zero
+        } else {
+            selectedStrokeIndices = []
+            inkGesture = .marquee(start: point)
+            marqueeRect = CGRect(origin: point, size: .zero)
+        }
+        setNeedsDisplay()
+    }
+
+    private func updateInkSelection(_ touches: Set<UITouch>) {
+        guard let inkGesture, let selectionTouch,
+              let touch = touches.first(where: { ObjectIdentifier($0) == selectionTouch }) else { return }
+        let point = touch.location(in: self)
+        switch inkGesture {
+        case .marquee(let start):
+            marqueeRect = CGRect(x: start.x, y: start.y, width: point.x - start.x, height: point.y - start.y).standardized
+        case .moving(let start):
+            moveDelta = CGSize(width: point.x - start.x, height: point.y - start.y)
+        }
+        setNeedsDisplay()
+    }
+
+    private func finishInkSelection(_ touches: Set<UITouch>, commit: Bool) {
+        guard inkGesture != nil else { return }
+        if let selectionTouch, !touches.contains(where: { ObjectIdentifier($0) == selectionTouch }) {
+            return
+        }
+        let gesture = inkGesture
+        let delta = moveDelta
+        let marquee = marqueeRect
+        inkGesture = nil
+        selectionTouch = nil
+        marqueeRect = nil
+        moveDelta = .zero
+        defer { setNeedsDisplay() }
+        guard commit, let model, let gesture else {
+            return
+        }
+        let fit = drawingRect(for: model)
+        guard fit.width > 1, fit.height > 1 else { return }
+        switch gesture {
+        case .marquee(let start):
+            guard let marquee else {
+                selectedStrokeIndices = []
+                return
+            }
+            if marquee.width < 8, marquee.height < 8 {
+                let point = Self.normalize(start, fit: fit)
+                let tap = CGRect(x: point.x - 0.01, y: point.y - 0.01, width: 0.02, height: 0.02)
+                selectedStrokeIndices = IndexSet(
+                    model.ink.strokes.indices.filter { model.ink.strokes[$0].intersects(tap) }.suffix(1)
+                )
+            } else {
+                let normalized = CGRect(
+                    x: (marquee.minX - fit.minX) / fit.width,
+                    y: (marquee.minY - fit.minY) / fit.height,
+                    width: marquee.width / fit.width,
+                    height: marquee.height / fit.height
+                )
+                selectedStrokeIndices = IndexSet(
+                    model.ink.strokes.indices.filter { model.ink.strokes[$0].intersects(normalized) }
+                )
+            }
+        case .moving:
+            guard hypot(delta.width, delta.height) > 1 else { return }
+            let dx = delta.width / fit.width
+            let dy = delta.height / fit.height
+            var strokes = model.ink.strokes
+            var moved = false
+            for index in selectedStrokeIndices where strokes.indices.contains(index) {
+                strokes[index].points = strokes[index].points.map { CGPoint(x: $0.x + dx, y: $0.y + dy) }
+                moved = true
+            }
+            if moved {
+                model.replaceInk(strokes)
+            }
+        }
+    }
+
+    private func shiftedStrokes(_ strokes: [LinkStroke], fit: CGRect) -> [LinkStroke] {
+        guard fit.width > 1, fit.height > 1 else { return strokes }
+        let dx = moveDelta.width / fit.width
+        let dy = moveDelta.height / fit.height
+        return strokes.enumerated().map { index, stroke in
+            guard selectedStrokeIndices.contains(index) else { return stroke }
+            var moved = stroke
+            moved.points = stroke.points.map { CGPoint(x: $0.x + dx, y: $0.y + dy) }
+            return moved
+        }
+    }
+
+    private func selectionBounds(fit: CGRect) -> CGRect? {
+        guard let model, !selectedStrokeIndices.isEmpty else { return nil }
+        var rect: CGRect?
+        for index in selectedStrokeIndices {
+            guard model.ink.strokes.indices.contains(index) else { continue }
+            let stroke = model.ink.strokes[index]
+            let pad = max(8, fit.height * stroke.widthFraction / 2)
+            for point in stroke.points {
+                let viewPoint = Self.map(point, fit: fit)
+                let dot = CGRect(x: viewPoint.x - pad, y: viewPoint.y - pad, width: pad * 2, height: pad * 2)
+                rect = rect?.union(dot) ?? dot
+            }
+        }
+        return rect?.insetBy(dx: -8, dy: -8)
+    }
+
+    private func drawInkSelection(fit: CGRect) {
+        guard model?.settings.selectedTool == .selection else { return }
+        if let marqueeRect, marqueeRect.width > 1, marqueeRect.height > 1 {
+            let path = UIBezierPath(rect: marqueeRect)
+            UIColor.systemBlue.withAlphaComponent(0.15).setFill()
+            path.fill()
+            path.lineWidth = 1.5
+            path.setLineDash([5, 4], count: 2, phase: 0)
+            UIColor.systemBlue.setStroke()
+            path.stroke()
+        }
+        if var bounds = selectionBounds(fit: fit) {
+            bounds.origin.x += moveDelta.width
+            bounds.origin.y += moveDelta.height
+            let path = UIBezierPath(roundedRect: bounds, cornerRadius: 6)
+            path.lineWidth = 1.5
+            path.setLineDash([5, 4], count: 2, phase: 0)
+            UIColor.systemBlue.setStroke()
+            path.stroke()
+        }
+    }
+
     private func drawingRect(for model: MacLinkModel) -> CGRect {
         guard let image = model.image else { return bounds }
         return Self.aspectFit(image.size, in: bounds)
@@ -848,6 +1058,10 @@ final class MacLinkCanvasView: UIView {
             hex = "#000000"
             alpha = 1
             isEraser = true
+        case .selection:
+            hex = "#000000"
+            alpha = 1
+            isEraser = false
         }
         return StrokeSample(
             x: Double((point.x - fit.minX) / fit.width),

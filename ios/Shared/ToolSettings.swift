@@ -6,6 +6,7 @@ enum DrawingToolKind: String, CaseIterable, Identifiable, Codable {
     case colorPen
     case highlighter
     case eraser
+    case selection
 
     var id: String { rawValue }
 
@@ -15,6 +16,7 @@ enum DrawingToolKind: String, CaseIterable, Identifiable, Codable {
         case .colorPen: return "컬러"
         case .highlighter: return "형광"
         case .eraser: return "지우개"
+        case .selection: return "선택"
         }
     }
 
@@ -24,6 +26,7 @@ enum DrawingToolKind: String, CaseIterable, Identifiable, Codable {
         case .colorPen: return "paintbrush.pointed"
         case .highlighter: return "highlighter"
         case .eraser: return "eraser"
+        case .selection: return "lasso"
         }
     }
 }
@@ -67,9 +70,9 @@ struct ToolSettings: Codable, Equatable {
         eraserWidth = try c.decodeIfPresent(CGFloat.self, forKey: .eraserWidth) ?? 30
 
         if let savedLast = try c.decodeIfPresent(DrawingToolKind.self, forKey: .lastInkTool),
-           savedLast != .eraser {
+           savedLast != .eraser, savedLast != .selection {
             lastInkTool = savedLast
-        } else if selectedTool != .eraser {
+        } else if selectedTool != .eraser, selectedTool != .selection {
             lastInkTool = selectedTool
         } else {
             lastInkTool = .blackPen
@@ -78,9 +81,12 @@ struct ToolSettings: Codable, Equatable {
 
     var isEraserSelected: Bool { selectedTool == .eraser }
 
-    /// 빠른 전환 시 돌아갈 잉크 도구 (지우개가 저장돼 있으면 검정으로 보정)
+    /// 빠른 전환 시 돌아갈 잉크 도구. 지우개·선택은 잉크가 아니라 검정으로 보정한다.
     var resolvedLastInkTool: DrawingToolKind {
-        lastInkTool == .eraser ? .blackPen : lastInkTool
+        switch lastInkTool {
+        case .eraser, .selection: return .blackPen
+        default: return lastInkTool
+        }
     }
 
     func makeTool(for kind: DrawingToolKind) -> PKTool {
@@ -94,11 +100,13 @@ struct ToolSettings: Codable, Equatable {
             return PKInkingTool(.marker, color: color, width: highlighterWidth)
         case .eraser:
             return PKEraserTool(.bitmap, width: eraserWidth)
+        case .selection:
+            return PKLassoTool()
         }
     }
 
     mutating func selectTool(_ kind: DrawingToolKind) {
-        if kind != .eraser {
+        if kind != .eraser, kind != .selection {
             lastInkTool = kind
         }
         selectedTool = kind
@@ -108,8 +116,10 @@ struct ToolSettings: Codable, Equatable {
     mutating func toggleEraserWithLastInk() {
         if selectedTool == .eraser {
             selectedTool = resolvedLastInkTool
-        } else {
+        } else if selectedTool != .selection {
             lastInkTool = selectedTool
+            selectedTool = .eraser
+        } else {
             selectedTool = .eraser
         }
     }
@@ -120,6 +130,7 @@ struct ToolSettings: Codable, Equatable {
         case .colorPen: colorPenWidth = width
         case .highlighter: highlighterWidth = width
         case .eraser: eraserWidth = width
+        case .selection: break
         }
     }
 
@@ -129,6 +140,7 @@ struct ToolSettings: Codable, Equatable {
         case .colorPen: return colorPenWidth
         case .highlighter: return highlighterWidth
         case .eraser: return eraserWidth
+        case .selection: return 1
         }
     }
 

@@ -16,6 +16,10 @@ final class MacLinkHost: ObservableObject {
     private let overlay = OverlayPanel()
     private var didStart = false
     private var captureTask: Task<Void, Never>?
+    private var restartWork: DispatchWorkItem?
+    private var lastCaptureStop = Date.distantPast
+    private var waitForWake = false
+    private let displayResume = DisplayResumeObserver()
 
     init() {
         code = Self.makeCode()
@@ -33,11 +37,17 @@ final class MacLinkHost: ObservableObject {
             }
             channel.send(kind: .frame, payload: data, onFlushed: done)
         }
-        sender.onStopped = { [weak self] message in
+        sender.onStopped = { [weak self] _ in
             DispatchQueue.main.async {
-                self?.captureWarning = message
+                self?.captureStopped()
             }
         }
+        displayResume.onResume = { [weak self] in
+            DispatchQueue.main.async {
+                self?.displayResumed()
+            }
+        }
+        displayResume.start()
         do {
             try startListener()
         } catch {
@@ -151,6 +161,9 @@ final class MacLinkHost: ObservableObject {
             overlay.clearAll()
         case .overlayVisible:
             overlay.setContentVisible(payload.first != 0)
+        case .replaceInk:
+            guard let wires = try? JSONDecoder().decode([LinkStrokeWire].self, from: payload) else { return }
+            overlay.replaceInk(wires.map { $0.stroke() })
         case .pointer:
             guard let event = PointerEvent(data: payload) else { return }
             MacPointer.apply(event)
@@ -170,11 +183,60 @@ final class MacLinkHost: ObservableObject {
             return
         }
         captureWarning = nil
+        waitForWake = false
+        startCapture(delay: 0)
+    }
+
+    /// 캡처가 죽으면 한 번 다시 연다. 바로 또 죽으면 화면이 깨어날 때까지 기다린다.
+    private func captureStopped() {
+        guard isConnected, !waitForWake else { return }
+        let now = Date()
+        if now.timeIntervalSince(lastCaptureStop) < 2 {
+            waitForWake = true
+            return
+        }
+        lastCaptureStop = now
+        scheduleRestart()
+    }
+
+    /// 화면 보호기·잠자기가 끝나면 스트림을 새로 만든다.
+    private func displayResumed() {
+        guard isConnected else { return }
+        waitForWake = false
+        lastCaptureStop = .distantPast
+        scheduleRestart()
+    }
+
+    private func scheduleRestart() {
+        guard isConnected else { return }
+        restartWork?.cancel()
+        let work = DispatchWorkItem { [weak self] in
+            self?.startCapture(delay: 0)
+        }
+        restartWork = work
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5, execute: work)
+    }
+
+    private func startCapture(delay: TimeInterval) {
+        guard isConnected else { return }
         captureTask?.cancel()
         captureTask = Task { [weak self] in
+            if delay > 0 {
+                try? await Task.sleep(nanoseconds: UInt64(delay * 1_000_000_000))
+            }
             guard let self else { return }
+            guard !Task.isCancelled, self.isConnected, CGPreflightScreenCaptureAccess() else { return }
             do {
                 try await self.sender.start()
+                if !self.isConnected {
+                    self.sender.stop()
+                    return
+                }
+                await MainActor.run {
+                    if self.isConnected {
+                        self.captureWarning = nil
+                    }
+                }
             } catch {
                 await MainActor.run {
                     self.captureWarning = error.localizedDescription
@@ -192,6 +254,9 @@ final class MacLinkHost: ObservableObject {
 
     private func handleDisconnect() {
         guard channel != nil || isConnected else { return }
+        restartWork?.cancel()
+        restartWork = nil
+        waitForWake = false
         captureTask?.cancel()
         sender.stop()
         MacPointer.releaseButton()
@@ -241,5 +306,38 @@ final class MacLinkHost: ObservableObject {
 
     private static func makeCode() -> String {
         String(format: "%04d", Int.random(in: 0...9999))
+    }
+}
+
+/// 화면 보호기·잠자기가 끝난 알림. 앱이 백그라운드여도 바로 받는다.
+private final class DisplayResumeObserver: NSObject {
+    var onResume: (() -> Void)?
+
+    func start() {
+        let distributed = DistributedNotificationCenter.default()
+        for name in ["com.apple.screensaver.didstop", "com.apple.screenIsUnlocked"] {
+            distributed.addObserver(
+                self,
+                selector: #selector(resume(_:)),
+                name: Notification.Name(name),
+                object: nil,
+                suspensionBehavior: .deliverImmediately
+            )
+        }
+        let workspace = NSWorkspace.shared.notificationCenter
+        workspace.addObserver(self, selector: #selector(resume(_:)), name: NSWorkspace.screensDidWakeNotification, object: nil)
+        workspace.addObserver(self, selector: #selector(resume(_:)), name: NSWorkspace.didWakeNotification, object: nil)
+        NotificationCenter.default.addObserver(
+            self,
+            selector: #selector(resume(_:)),
+            name: NSApplication.didChangeScreenParametersNotification,
+            object: nil
+        )
+    }
+
+    @objc private func resume(_ notification: Notification) {
+        DispatchQueue.main.async { [weak self] in
+            self?.onResume?()
+        }
     }
 }
