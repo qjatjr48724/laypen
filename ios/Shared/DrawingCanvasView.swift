@@ -8,13 +8,13 @@ struct DrawingCanvasView: UIViewRepresentable {
     @Binding var viewport: CanvasViewport
     var tool: PKTool
     var isDrawingEnabled: Bool
-    var allowsFingerDrawing: Bool = true
+    var inputMode: DrawingInputMode = .pen
 
     func makeUIView(context: Context) -> PKCanvasView {
         let canvas = PKCanvasView()
         // 다크모드에서 검정 잉크가 흰색으로 뒤집히는 것을 막는다.
         canvas.overrideUserInterfaceStyle = .light
-        canvas.drawingPolicy = allowsFingerDrawing ? .anyInput : .pencilOnly
+        canvas.drawingPolicy = inputMode.allowsFingerDrawing ? .anyInput : .pencilOnly
         canvas.backgroundColor = .clear
         canvas.isOpaque = false
         canvas.delegate = context.coordinator
@@ -56,11 +56,11 @@ struct DrawingCanvasView: UIViewRepresentable {
             canvas.drawing = drawing
         }
         canvas.tool = tool
-        canvas.drawingPolicy = allowsFingerDrawing ? .anyInput : .pencilOnly
+        canvas.drawingPolicy = inputMode.allowsFingerDrawing ? .anyInput : .pencilOnly
         canvas.drawingGestureRecognizer.isEnabled = isDrawingEnabled
         canvas.minimumZoomScale = CanvasViewport.minZoom
         canvas.maximumZoomScale = CanvasViewport.maxZoom
-        context.coordinator.ensureTwoFingerPan(on: canvas)
+        context.coordinator.ensureScrollTouchCount(on: canvas)
 
         // contentSize를 매 프레임 강제로 넣으면 줌 후 팬이 막힌다. 1x일 때만 맞춘다.
         if canvas.bounds.width > 1, canvas.bounds.height > 1, abs(canvas.zoomScale - 1) < 0.01 {
@@ -120,24 +120,28 @@ struct DrawingCanvasView: UIViewRepresentable {
         }
 
         func configureGestures(on canvas: PKCanvasView) {
-            ensureTwoFingerPan(on: canvas)
+            ensureScrollTouchCount(on: canvas)
             guard !didBindDrawingGesture else { return }
             canvas.drawingGestureRecognizer.addTarget(self, action: #selector(handleDrawingGesture(_:)))
             didBindDrawingGesture = true
         }
 
-        func ensureTwoFingerPan(on canvas: PKCanvasView) {
+        func ensureScrollTouchCount(on canvas: PKCanvasView) {
             let drawing = canvas.drawingGestureRecognizer
+            let oneFingerScroll = parent.inputMode.usesOneFingerCanvasScroll
             for recognizer in canvas.gestureRecognizers ?? [] {
                 guard let pan = recognizer as? UIPanGestureRecognizer else { continue }
-                // 필기용 팬(1손가락)과 스크롤 팬을 구분
+                // 필기용 제스처는 건드리지 않는다. 스크롤은 화면을 손가락으로 끄는 방향.
                 if pan === drawing { continue }
-                // drawingGestureRecognizer가 UIPan이 아닌 경우도 있어, 터치 수로 스크롤 팬만 제한
-                if pan.minimumNumberOfTouches <= 1 && pan.maximumNumberOfTouches <= 1 {
-                    // 일부 내부 제스처 — 건너뜀
+                if oneFingerScroll {
+                    // 펜 / 손+펜: 한·두 손가락으로 화면을 끈다.
+                    pan.minimumNumberOfTouches = 1
+                    pan.maximumNumberOfTouches = 2
+                } else {
+                    // 손: 한 손가락은 필기, 두 손가락으로 화면을 끈다.
+                    pan.minimumNumberOfTouches = 2
+                    pan.maximumNumberOfTouches = 2
                 }
-                pan.minimumNumberOfTouches = 2
-                pan.maximumNumberOfTouches = 2
             }
         }
 
@@ -417,7 +421,7 @@ struct AnnotatedCanvas: View {
     var layoutAnchorSize: CGSize
     var tool: PKTool
     var isDrawingEnabled: Bool
-    var allowsFingerDrawing: Bool = true
+    var inputMode: DrawingInputMode = .pen
     var isPlacingWhiteRect: Bool
     var backgroundImage: UIImage?
     var onShapesChanged: () -> Void
@@ -466,7 +470,7 @@ struct AnnotatedCanvas: View {
                     viewport: $viewport,
                     tool: tool,
                     isDrawingEnabled: isDrawingEnabled && !isPlacingWhiteRect && !isLiveResizing,
-                    allowsFingerDrawing: allowsFingerDrawing
+                    inputMode: inputMode
                 )
                 .frame(width: anchor.width, height: anchor.height)
                 .allowsHitTesting(!isPlacingWhiteRect && !isLiveResizing)

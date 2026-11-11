@@ -110,7 +110,7 @@ private struct ShareDrawingView: View {
                     layoutAnchorSize: model.layoutAnchorSize,
                     tool: model.currentTool,
                     isDrawingEnabled: model.settings.isDrawingEnabled,
-                    allowsFingerDrawing: model.settings.allowsFingerDrawing,
+                    inputMode: model.settings.inputMode,
                     isPlacingWhiteRect: model.isPlacingWhiteRect,
                     backgroundImage: model.backgroundImage,
                     onShapesChanged: { model.persist() },

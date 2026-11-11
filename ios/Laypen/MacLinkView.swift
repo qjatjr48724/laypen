@@ -54,6 +54,11 @@ struct MacLinkView: View {
                 model.settings.isDrawingEnabled = true
             }
         }
+        .onChange(of: model.settings.inputMode) { _, mode in
+            if mode == .penAndHand, model.controlsMac {
+                model.setControlsMac(false)
+            }
+        }
     }
 
     private var pairing: some View {
@@ -156,6 +161,15 @@ struct MacLinkView: View {
                     .padding(.top, 12)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .allowsHitTesting(false)
+            } else if model.settings.inputMode == .penAndHand {
+                Text("펜으로 필기하고, 손가락으로 맥을 조작합니다. 두 손가락은 스크롤")
+                    .font(.subheadline.weight(.semibold))
+                    .padding(.horizontal, 12)
+                    .padding(.vertical, 8)
+                    .background(.ultraThinMaterial, in: Capsule())
+                    .padding(.top, 12)
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
+                    .allowsHitTesting(false)
             } else if model.isPlacingWhiteRect {
                 Text("드래그로 상자 크기 지정")
                     .font(.subheadline.weight(.semibold))
@@ -203,7 +217,7 @@ struct MacLinkCanvas: UIViewRepresentable {
 
     func updateUIView(_ uiView: MacLinkCanvasView, context: Context) {
         bind(uiView)
-        if !model.controlsMac {
+        if !model.controlsMac, model.settings.inputMode != .penAndHand {
             uiView.releaseControl()
         }
         if model.settings.selectedTool != .selection {
@@ -377,6 +391,7 @@ final class MacLinkCanvasView: UIView {
             trackControl(touches, phase: .began)
             return
         }
+        if routePenAndHand(touches, event: event, phase: .began) { return }
         if model.settings.selectedTool == .selection {
             beginInkSelection(touches)
             return
@@ -403,6 +418,7 @@ final class MacLinkCanvasView: UIView {
             trackControl(touches, phase: .moved)
             return
         }
+        if routePenAndHand(touches, event: event, phase: .moved) { return }
         if model?.settings.selectedTool == .selection {
             updateInkSelection(touches)
             return
@@ -416,6 +432,7 @@ final class MacLinkCanvasView: UIView {
             trackControl(touches, phase: .ended)
             return
         }
+        if routePenAndHand(touches, event: event, phase: .ended) { return }
         if model?.settings.selectedTool == .selection {
             finishInkSelection(touches, commit: true)
             return
@@ -429,12 +446,41 @@ final class MacLinkCanvasView: UIView {
             trackControl(touches, phase: .cancelled)
             return
         }
+        if routePenAndHand(touches, event: event, phase: .cancelled) { return }
         if model?.settings.selectedTool == .selection {
             finishInkSelection(touches, commit: false)
             return
         }
         if finishBoxEdit(touches, commit: false) { return }
         append(touches, event: event, phase: .ended)
+    }
+
+    /// 손+펜: 펜은 필기, 손가락은 맥 조작.
+    private func routePenAndHand(
+        _ touches: Set<UITouch>,
+        event: UIEvent?,
+        phase: UITouch.Phase
+    ) -> Bool {
+        guard let model,
+              model.settings.inputMode == .penAndHand,
+              model.settings.selectedTool != .selection,
+              !model.isPlacingWhiteRect,
+              model.settings.isDrawingEnabled else { return false }
+        let fingers = Set(touches.filter { $0.type == .direct })
+        let pencils = Set(touches.filter { $0.type == .pencil })
+        if !fingers.isEmpty {
+            trackControl(fingers, phase: phase)
+        }
+        if !pencils.isEmpty {
+            let strokePhase: StrokePhase
+            switch phase {
+            case .began: strokePhase = .began
+            case .ended, .cancelled: strokePhase = .ended
+            default: strokePhase = .moved
+            }
+            append(pencils, event: event, phase: strokePhase)
+        }
+        return true
     }
 
     private func trackControl(_ touches: Set<UITouch>, phase: UITouch.Phase) {
@@ -559,10 +605,11 @@ final class MacLinkCanvasView: UIView {
         let fit = drawingRect(for: model)
         guard fit.width > 1, fit.height > 1 else { return }
         for touch in touches {
-            if touch.type == .pencil {
-            } else if model.settings.allowsFingerDrawing, touch.type == .direct {
-            } else {
-                continue
+            switch model.settings.inputMode {
+            case .pen, .penAndHand:
+                guard touch.type == .pencil else { continue }
+            case .hand:
+                guard touch.type == .direct || touch.type == .pencil else { continue }
             }
             let id = ObjectIdentifier(touch)
             let location = touch.location(in: self)

@@ -18,7 +18,7 @@ struct ContentView: View {
                 layoutAnchorSize: session.layoutAnchorSize,
                 tool: session.currentTool,
                 isDrawingEnabled: session.settings.isDrawingEnabled,
-                allowsFingerDrawing: session.settings.allowsFingerDrawing,
+                inputMode: session.settings.inputMode,
                 isPlacingWhiteRect: session.isPlacingWhiteRect,
                 backgroundImage: session.backgroundImage,
                 onShapesChanged: { session.persist() },

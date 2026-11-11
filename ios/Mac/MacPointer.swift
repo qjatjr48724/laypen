@@ -64,8 +64,10 @@ enum MacPointer {
 
     private static func scroll(dx: Float, dy: Float, at point: CGPoint, on screen: NSScreen) {
         let frame = screen.frame
-        let wheelX = Int32((CGFloat(dx) * frame.width).rounded())
-        let wheelY = Int32((-CGFloat(dy) * frame.height).rounded())
+        // 손가락을 위로 쓸면 아래 내용이 올라온다 (아이패드와 같은 끌기).
+        // CGEvent는 양수 wheel이 위쪽 내용을 보여 주므로, 터치 dy 부호를 그대로 쓴다.
+        let wheelX = Int32((-CGFloat(dx) * frame.width).rounded())
+        let wheelY = Int32((CGFloat(dy) * frame.height).rounded())
         guard wheelX != 0 || wheelY != 0 else { return }
         guard let event = CGEvent(
             scrollWheelEvent2Source: nil,

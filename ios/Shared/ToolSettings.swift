@@ -31,13 +31,51 @@ enum DrawingToolKind: String, CaseIterable, Identifiable, Codable {
     }
 }
 
+/// 필기·화면 조작에 쓰는 입력.
+enum DrawingInputMode: String, CaseIterable, Identifiable, Codable {
+    case pen
+    case penAndHand
+    case hand
+
+    var id: String { rawValue }
+
+    var title: String {
+        switch self {
+        case .pen: return "펜"
+        case .penAndHand: return "손+펜"
+        case .hand: return "손"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .pen: return "applepencil"
+        case .penAndHand: return "hand.point.up.left"
+        case .hand: return "hand.draw"
+        }
+    }
+
+    var hint: String {
+        switch self {
+        case .pen: return "펜으로 필기 · 화면 조작은 마우스 버튼"
+        case .penAndHand: return "펜으로 필기 · 손으로 화면 조작"
+        case .hand: return "손으로 필기 · 화면 조작은 마우스 버튼"
+        }
+    }
+
+    /// PencilKit에서 손가락 필기를 받을지.
+    var allowsFingerDrawing: Bool { self == .hand }
+
+    /// 메인 캔버스에서 한 손가락 스크롤을 쓸지. 손 필기일 땐 두 손가락만.
+    var usesOneFingerCanvasScroll: Bool { self != .hand }
+}
+
 struct ToolSettings: Codable, Equatable {
     var selectedTool: DrawingToolKind = .blackPen
     /// 지우개 전환 전에 쓰던 잉크 도구 (검정/컬러/형광)
     var lastInkTool: DrawingToolKind = .blackPen
     var isDrawingEnabled: Bool = true
-    /// true면 손가락+펜, false면 Apple Pencil만 필기
-    var allowsFingerDrawing: Bool = true
+    var inputMode: DrawingInputMode = .pen
 
     var blackPenWidth: CGFloat = 5
     var colorPenWidth: CGFloat = 5
@@ -50,7 +88,7 @@ struct ToolSettings: Codable, Equatable {
     private static let solidBlack = UIColor(red: 0, green: 0, blue: 0, alpha: 1)
 
     enum CodingKeys: String, CodingKey {
-        case selectedTool, lastInkTool, isDrawingEnabled, allowsFingerDrawing
+        case selectedTool, lastInkTool, isDrawingEnabled, inputMode, allowsFingerDrawing
         case blackPenWidth, colorPenWidth, colorPenColorHex
         case highlighterWidth, highlighterColorHex, eraserWidth
     }
@@ -61,7 +99,13 @@ struct ToolSettings: Codable, Equatable {
         let c = try decoder.container(keyedBy: CodingKeys.self)
         selectedTool = try c.decodeIfPresent(DrawingToolKind.self, forKey: .selectedTool) ?? .blackPen
         isDrawingEnabled = try c.decodeIfPresent(Bool.self, forKey: .isDrawingEnabled) ?? true
-        allowsFingerDrawing = try c.decodeIfPresent(Bool.self, forKey: .allowsFingerDrawing) ?? true
+        if let mode = try c.decodeIfPresent(DrawingInputMode.self, forKey: .inputMode) {
+            inputMode = mode
+        } else if let finger = try c.decodeIfPresent(Bool.self, forKey: .allowsFingerDrawing) {
+            inputMode = finger ? .hand : .pen
+        } else {
+            inputMode = .pen
+        }
         blackPenWidth = try c.decodeIfPresent(CGFloat.self, forKey: .blackPenWidth) ?? 5
         colorPenWidth = try c.decodeIfPresent(CGFloat.self, forKey: .colorPenWidth) ?? 5
         colorPenColorHex = try c.decodeIfPresent(String.self, forKey: .colorPenColorHex) ?? "#E53935"
@@ -78,6 +122,22 @@ struct ToolSettings: Codable, Equatable {
             lastInkTool = .blackPen
         }
     }
+
+    func encode(to encoder: Encoder) throws {
+        var c = encoder.container(keyedBy: CodingKeys.self)
+        try c.encode(selectedTool, forKey: .selectedTool)
+        try c.encode(lastInkTool, forKey: .lastInkTool)
+        try c.encode(isDrawingEnabled, forKey: .isDrawingEnabled)
+        try c.encode(inputMode, forKey: .inputMode)
+        try c.encode(blackPenWidth, forKey: .blackPenWidth)
+        try c.encode(colorPenWidth, forKey: .colorPenWidth)
+        try c.encode(colorPenColorHex, forKey: .colorPenColorHex)
+        try c.encode(highlighterWidth, forKey: .highlighterWidth)
+        try c.encode(highlighterColorHex, forKey: .highlighterColorHex)
+        try c.encode(eraserWidth, forKey: .eraserWidth)
+    }
+
+    var allowsFingerDrawing: Bool { inputMode.allowsFingerDrawing }
 
     var isEraserSelected: Bool { selectedTool == .eraser }
 

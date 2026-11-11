@@ -43,13 +43,11 @@ struct FloatingToolbar: View {
     @State private var menuFadedIn = false
     @State private var menuToggleTask: Task<Void, Never>?
 
-    /// 맥 연결 화면은 접힌 버튼이 두 줄이라 크롬이 더 높다.
-    private var showsCollapsedMacRow: Bool {
-        showsMacScreen != nil || controlsMac != nil || showsMacInk != nil
-    }
+    /// 접힌 툴바는 undo/redo 줄이 있어 크롬이 두 줄이다.
+    private var chromeHeight: CGFloat { 88 }
 
-    private var chromeHeight: CGFloat {
-        showsCollapsedMacRow ? 88 : 52
+    private var showsCollapsedMacButtons: Bool {
+        showsMacScreen != nil || controlsMac != nil || showsMacInk != nil
     }
 
     private var menuMaxHeight: CGFloat {
@@ -68,8 +66,8 @@ struct FloatingToolbar: View {
     var body: some View {
         VStack(alignment: .trailing, spacing: 4) {
             // 접기/ON을 위에 고정 — 창이 작아져도 항상 보이게.
-            // 맥 버튼까지 한 줄로 두면 가로가 벌어지므로 두 줄로 나눈다.
-            VStack(alignment: .trailing, spacing: 5) {
+            // 아랫줄 왼쪽은 undo/redo, 맥 버튼은 오른쪽에 둔다.
+            VStack(alignment: .leading, spacing: 5) {
                 HStack(spacing: 5) {
                     Button {
                         toggleMenu()
@@ -111,8 +109,38 @@ struct FloatingToolbar: View {
                     .buttonStyle(.plain)
                 }
 
-                if showsCollapsedMacRow {
-                    HStack(spacing: 5) {
+                HStack(spacing: 5) {
+                    Button(action: onUndo) {
+                        Image(systemName: "arrow.uturn.backward")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(canUndo ? Color.accentColor : Color.secondary.opacity(0.35))
+                            .frame(width: buttonSide, height: buttonSide)
+                            .background(
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .fill(Color.primary.opacity(canUndo ? 0.08 : 0.04))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!canUndo)
+                    .accessibilityLabel("실행 취소")
+
+                    Button(action: onRedo) {
+                        Image(systemName: "arrow.uturn.forward")
+                            .font(.caption2.weight(.semibold))
+                            .foregroundStyle(canRedo ? Color.accentColor : Color.secondary.opacity(0.35))
+                            .frame(width: buttonSide, height: buttonSide)
+                            .background(
+                                RoundedRectangle(cornerRadius: 7, style: .continuous)
+                                    .fill(Color.primary.opacity(canRedo ? 0.08 : 0.04))
+                            )
+                    }
+                    .buttonStyle(.plain)
+                    .disabled(!canRedo)
+                    .accessibilityLabel("다시 실행")
+
+                    if showsCollapsedMacButtons {
+                        Spacer(minLength: 0)
+
                         if let showsMacScreen {
                             let screenOn = showsMacScreen.wrappedValue
                             Button {
@@ -175,6 +203,7 @@ struct FloatingToolbar: View {
                         }
                     }
                 }
+                .frame(maxWidth: .infinity, alignment: .leading)
             }
 
             if isMenuOpen {
@@ -368,21 +397,19 @@ struct FloatingToolbar: View {
             }
 
             HStack(spacing: 6) {
-                inputModeButton(
-                    title: "펜만",
-                    systemImage: "applepencil",
-                    selected: !settings.allowsFingerDrawing
-                ) {
-                    settings.allowsFingerDrawing = false
-                }
-                inputModeButton(
-                    title: "손+펜",
-                    systemImage: "hand.draw",
-                    selected: settings.allowsFingerDrawing
-                ) {
-                    settings.allowsFingerDrawing = true
+                ForEach(DrawingInputMode.allCases) { mode in
+                    inputModeButton(
+                        title: mode.title,
+                        systemImage: mode.systemImage,
+                        selected: settings.inputMode == mode
+                    ) {
+                        settings.inputMode = mode
+                    }
                 }
             }
+            Text(settings.inputMode.hint)
+                .font(.caption2)
+                .foregroundStyle(.secondary)
 
             if settings.selectedTool != .selection {
                 Divider()
