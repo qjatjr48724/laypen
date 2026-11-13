@@ -447,7 +447,7 @@ struct AnnotatedCanvas: View {
                             .resizable()
                             .scaledToFit()
                     } else {
-                        Color(uiColor: .secondarySystemBackground)
+                        Color.white
                     }
                 }
 

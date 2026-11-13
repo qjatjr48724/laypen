@@ -2,11 +2,80 @@ import SwiftUI
 import PhotosUI
 
 struct ContentView: View {
+    private enum Destination {
+        case home
+        case canvas
+    }
+
     @StateObject private var session = DrawingSessionModel()
+    @AppStorage(AppColorThemeStore.key) private var colorThemeRaw = AppColorTheme.system.rawValue
     @State private var photoItem: PhotosPickerItem?
+    @State private var destination: Destination = .home
     @State private var showMacLink = false
+    @State private var macPreferredName: String?
+    @State private var macAutoConnect = false
+    @State private var savedPeers: [LinkTrustStore.SavedPeer] = []
+
+    private var colorTheme: Binding<AppColorTheme> {
+        Binding(
+            get: { AppColorTheme(rawValue: colorThemeRaw) ?? .system },
+            set: { colorThemeRaw = $0.rawValue }
+        )
+    }
 
     var body: some View {
+        Group {
+            switch destination {
+            case .home:
+                HomeView(
+                    colorTheme: colorTheme,
+                    savedPeers: savedPeers,
+                    onConnectSaved: { peer in
+                        openMacLink(preferredName: peer.name, autoConnect: true)
+                    },
+                    onConnectOtherMac: {
+                        openMacLink(preferredName: nil, autoConnect: false)
+                    },
+                    onBlankCanvas: {
+                        session.startBlankCanvas()
+                        destination = .canvas
+                    },
+                    onPickPhoto: { image in
+                        session.startWithPhoto(image)
+                        destination = .canvas
+                    }
+                )
+            case .canvas:
+                canvas
+            }
+        }
+        .preferredColorScheme(colorTheme.wrappedValue.preferredColorScheme)
+        .onAppear {
+            let openedFromShare = session.bootstrap()
+            refreshSavedPeers()
+            if openedFromShare {
+                destination = .canvas
+            }
+        }
+        .onOpenURL { _ in
+            if session.consumePendingShareIfNeeded() {
+                destination = .canvas
+            }
+        }
+        .fullScreenCover(isPresented: $showMacLink, onDismiss: {
+            macPreferredName = nil
+            macAutoConnect = false
+            refreshSavedPeers()
+        }) {
+            MacLinkView(
+                settings: $session.settings,
+                preferredPeerName: macPreferredName,
+                autoConnectTrusted: macAutoConnect
+            )
+        }
+    }
+
+    private var canvas: some View {
         ZStack {
             AnnotatedCanvas(
                 drawing: $session.drawing,
@@ -61,16 +130,18 @@ struct ContentView: View {
                     onExportShare: {
                         Task { await session.prepareShare() }
                     },
-                    onConnectMac: { showMacLink = true },
+                    onConnectMac: {
+                        openMacLink(preferredName: nil, autoConnect: false)
+                    },
+                    onGoHome: {
+                        session.persist()
+                        session.isMenuOpen = false
+                        refreshSavedPeers()
+                        destination = .home
+                    },
                     availableHeight: maxHeight
                 )
             }
-        }
-        .onAppear {
-            session.bootstrap()
-        }
-        .onOpenURL { _ in
-            session.consumePendingShareIfNeeded()
         }
         .onChange(of: session.drawing) { _, _ in
             session.persist()
@@ -112,8 +183,15 @@ struct ContentView: View {
             Text(session.saveMessage ?? "")
         }
         .laypenShareSheet(image: $session.shareImage)
-        .fullScreenCover(isPresented: $showMacLink) {
-            MacLinkView(settings: $session.settings)
-        }
+    }
+
+    private func openMacLink(preferredName: String?, autoConnect: Bool) {
+        macPreferredName = preferredName
+        macAutoConnect = autoConnect
+        showMacLink = true
+    }
+
+    private func refreshSavedPeers() {
+        savedPeers = LinkTrustStore.savedPeers()
     }
 }

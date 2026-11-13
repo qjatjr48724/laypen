@@ -5,21 +5,27 @@
 
 서버·로그인 없음. 같은 Wi-Fi이거나 가까이 있으면 두 기기가 직접 연결한다. USB는 충전만 한다.
 
-## 한눈에 보기
-
-| 하고 싶은 일 | Laypen에서 |
-| --- | --- |
-| 스크린샷 위에 필기 | 공유 → Laypen, 또는 앱에서 사진 열기 |
-| 맥 화면 위에 필기 | 맥·아이패드에서 Laypen 실행 → **맥에 연결** |
-| 아이패드로 맥 클릭·스크롤 | 연결 후 마우스 버튼, 또는 **손+펜** 모드 |
-| 필기만 잠깐 숨기기 | 눈 버튼 (맥·아이패드 동시) |
-| 필기 일부 옮기기 | **선택** 도구 |
-
----
-
 ## 기능
 
-각 항목은 **기능 → 설명 → 관련 코드** 순이다.
+| 기능 | 설명 |
+| --- | --- |
+| 첫 화면 | 앱을 켜면 가운데에서 맥 연결·빈 화면·사진 필기를 고른다 |
+| 스크린샷 필기 | 공유 → Laypen, 또는 첫 화면·메뉴에서 사진 열기 |
+| 맥 화면 위 필기 | 첫 화면에서 저장 맥 / 다른 맥 연결 |
+| 맥 클릭·스크롤 | 마우스 버튼, 또는 **손+펜** 모드 |
+| 필기 잠깐 숨기기 | 눈 버튼 (맥·아이패드 동시) |
+| 필기 일부 옮기기 | **선택** 도구 |
+
+아래에서 각 기능을 설명하고 관련 코드를 적는다.
+
+### 첫 화면
+
+앱을 켜면 가운데에 선택지가 있다. 저장해 둔 맥이 있으면 그 이름(저장됨)으로 강조해 보여 주고, **다른 맥에 연결**로 목록도 연다. 저장 맥이 없으면 **맥에 연결**만 둔다. 이름 없는 중복 토큰은 정리해서 같은 맥이 두 줄로 뜨지 않게 한다. **빈 화면에서 필기**는 흰 캔버스, **사진 선택해서 필기**는 앨범 이미지 위 필기다. 공유로 연 이미지가 있으면 첫 화면을 건너뛴다. 필기 화면 메뉴의 **첫 화면**으로 돌아온다. 화면 테마는 시스템을 따르고, 우측 위에서 **시스템 / 밝게 / 어둡게**로 바꿀 수 있다.
+
+- `ios/Laypen/HomeView.swift` — `HomeView`
+- `ios/Laypen/ContentView.swift` — 홈 ↔ 캔버스 전환, `preferredColorScheme`
+- `ios/Shared/AppColorTheme.swift` — `AppColorTheme`
+- `ios/Link/LinkTrustStore.swift` — `savedPeers()`, `pruneOrphanTokens()`
 
 ### 스크린샷 필기
 
@@ -85,7 +91,7 @@
 - `ios/Shared/FloatingToolbar.swift` — 입력 모드 버튼
 - `ios/Laypen/MacLinkView.swift` — `routePenAndHand()`
 - `ios/Shared/DrawingCanvasView.swift` — `ensureScrollTouchCount()`
-- `ios/Shared/EdgeSnappingDraggable.swift` — 툴바만 히트, 빈 화면 터치는 캔버스로 통과
+- `ios/Shared/EdgeSnappingDraggable.swift` — 툴바만 히트, 빈 화면 터치는 캔버스로 통과. 메뉴를 열어도 위·가로로 밀리지 않게 위에서 고정
 
 ### 필기 도구
 

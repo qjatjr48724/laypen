@@ -14,6 +14,7 @@
 		09AA4D3AFAD5800D28D7E12D /* ShortcutsGuideSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */; };
 		0C394AEFB5A60070A4DE3C21 /* SessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9FF0890947E173A5151615D1 /* SessionStore.swift */; };
 		1053CFA4A946B88F27D84EED /* MacHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 072E41233F6655A05050A032 /* MacHostView.swift */; };
+		16C75FD29AEEA1BF52C82293 /* AppColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A980B19EA6E4281BD7063DBF /* AppColorTheme.swift */; };
 		19C030A073ABBD313A71522D /* ToolSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */; };
 		2D8F611CC3186D7A42CF4D88 /* EdgeSnappingDraggable.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2E284648D28C77B1F7BDF978 /* EdgeSnappingDraggable.swift */; };
 		307DE4E4AC421BE1A22CAB68 /* MacPointer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 521DED78C3A58C2FB40AAD44 /* MacPointer.swift */; };
@@ -32,6 +33,7 @@
 		64D95DCABEE64E2A246F66F7 /* ShortcutsGuideSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = 96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */; };
 		67AE8B01CFAF17085C1E5861 /* ToolSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */; };
 		6C6C4EA9D285A3C50DA0C5C0 /* FloatingToolbar.swift in Sources */ = {isa = PBXBuildFile; fileRef = 148AD75494D202B3FBBCDFB0 /* FloatingToolbar.swift */; };
+		6DED6BB7E27E1E9C5DECC734 /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9325563BCFA769BCE6BC00DC /* HomeView.swift */; };
 		6DF605C83C895638AE50C986 /* ShareViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4978DCDCA55AA604E091A760 /* ShareViewController.swift */; };
 		702C3FC831E555B302F05508 /* OverlayPanel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3759CB871AF48D77C6367EEE /* OverlayPanel.swift */; };
 		7DAF600D0F683D5671874D2F /* MacLinkHost.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0EDE2385397115BB603ED93B /* MacLinkHost.swift */; };
@@ -43,6 +45,7 @@
 		87BF9CE4EE0C16409A350454 /* BackgroundSource.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */; };
 		972184D4ACACB0AF527D050C /* LinkMessages.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7AB2A501B26E5251BF618332 /* LinkMessages.swift */; };
 		9793CFB5DE5FD3219CC3E8A6 /* LinkTrustStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4B9681CCF5DEE3E9ADBBE3D0 /* LinkTrustStore.swift */; };
+		97B66508CA2B85D6630549C6 /* AppColorTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A980B19EA6E4281BD7063DBF /* AppColorTheme.swift */; };
 		97E1A6DC72C6A13E4F5B4E55 /* LaypenShare.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = C140FA12DB53D7C1F014BE16 /* LaypenShare.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A4AFD37440D9EE17560F379A /* ToolSettingsStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2FB7C2BFF8E0DA981A4D4BA1 /* ToolSettingsStore.swift */; };
 		AD042B1D9DD100F57D70987D /* ShapeStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 57A5B660FFFBE5816A04D41B /* ShapeStore.swift */; };
@@ -121,11 +124,13 @@
 		8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BackgroundSource.swift; sourceTree = "<group>"; };
 		8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasViewport.swift; sourceTree = "<group>"; };
 		91DD1891538B5B036F632489 /* LaypenMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaypenMacApp.swift; sourceTree = "<group>"; };
+		9325563BCFA769BCE6BC00DC /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		96A54AB9F37E4223CDE6CCCB /* ShortcutsGuideSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShortcutsGuideSheet.swift; sourceTree = "<group>"; };
 		9FF0890947E173A5151615D1 /* SessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionStore.swift; sourceTree = "<group>"; };
 		A04C3E0C4F266F2E21F880A0 /* MacLinkView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MacLinkView.swift; sourceTree = "<group>"; };
 		A25651C25BB42D786DD2EC79 /* LaypenApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LaypenApp.swift; sourceTree = "<group>"; };
 		A2E555164A06F5E836036CD5 /* LinkChannel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LinkChannel.swift; sourceTree = "<group>"; };
+		A980B19EA6E4281BD7063DBF /* AppColorTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppColorTheme.swift; sourceTree = "<group>"; };
 		ACC877A0926C1D6C9FF58435 /* Laypen.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Laypen.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		BC6DAD95F25A8541067A6FB6 /* ToolSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ToolSettings.swift; sourceTree = "<group>"; };
 		BF2059746C151860ABE2A40C /* AnnotationExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AnnotationExporter.swift; sourceTree = "<group>"; };
@@ -186,6 +191,7 @@
 			isa = PBXGroup;
 			children = (
 				BF2059746C151860ABE2A40C /* AnnotationExporter.swift */,
+				A980B19EA6E4281BD7063DBF /* AppColorTheme.swift */,
 				0ECBCCE3839FF2F5F6BBB4FB /* AppGroup.swift */,
 				8ABD7DC2CD8E07DA4C4B9A80 /* BackgroundSource.swift */,
 				8EED0FA3258F290A8DC46E66 /* CanvasViewport.swift */,
@@ -214,6 +220,7 @@
 			children = (
 				2EDDF40D347793170D3E2972 /* Assets.xcassets */,
 				190B600ED372BCF3D974E84A /* ContentView.swift */,
+				9325563BCFA769BCE6BC00DC /* HomeView.swift */,
 				A25651C25BB42D786DD2EC79 /* LaypenApp.swift */,
 				05042395AFB65F758AB39E79 /* MacLinkModel.swift */,
 				A04C3E0C4F266F2E21F880A0 /* MacLinkView.swift */,
@@ -377,6 +384,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				85EB479E4A7502FCDD44E624 /* AnnotationExporter.swift in Sources */,
+				97B66508CA2B85D6630549C6 /* AppColorTheme.swift in Sources */,
 				6084D216832FD74002E0DEAD /* AppGroup.swift in Sources */,
 				B7BA8DBB1BDB4BA2287745DC /* BackgroundSource.swift in Sources */,
 				B9C0BB0CF3EC717EE65F3B45 /* CanvasViewport.swift in Sources */,
@@ -405,6 +413,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				3C5BC818D5A9CD7C24717529 /* AnnotationExporter.swift in Sources */,
+				16C75FD29AEEA1BF52C82293 /* AppColorTheme.swift in Sources */,
 				BEC605771B7BB8EEC793EE39 /* AppGroup.swift in Sources */,
 				87BF9CE4EE0C16409A350454 /* BackgroundSource.swift in Sources */,
 				DD8F837A7AB086EC865E34FC /* CanvasViewport.swift in Sources */,
@@ -414,6 +423,7 @@
 				ADB23C5DE38EF29EAA5CEF7F /* DrawingSessionModel.swift in Sources */,
 				F5C3CB0C36ABED6A0B4C654A /* EdgeSnappingDraggable.swift in Sources */,
 				80403041B7B728E06311C34A /* FloatingToolbar.swift in Sources */,
+				6DED6BB7E27E1E9C5DECC734 /* HomeView.swift in Sources */,
 				F2A81C45598A9FB03983C9C3 /* LaypenApp.swift in Sources */,
 				7FC1D088AC55E0AA75BF56AC /* LinkChannel.swift in Sources */,
 				D8B9C7FD1C5D0BC5FCA9C70B /* LinkFrameDecoder.swift in Sources */,
@@ -452,11 +462,7 @@
 				CODE_SIGN_ENTITLEMENTS = LaypenShare/LaypenShare.entitlements;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LaypenShare/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.app.share;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;
@@ -673,11 +679,7 @@
 				CODE_SIGN_ENTITLEMENTS = LaypenShare/LaypenShare.entitlements;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = LaypenShare/Info.plist;
-				LD_RUNPATH_SEARCH_PATHS = (
-					"$(inherited)",
-					"@executable_path/Frameworks",
-					"@executable_path/../../Frameworks",
-				);
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.laypen.app.share;
 				SDKROOT = iphoneos;
 				SKIP_INSTALL = YES;

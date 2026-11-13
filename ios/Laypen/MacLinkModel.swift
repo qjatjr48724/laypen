@@ -58,9 +58,20 @@ final class MacLinkModel: ObservableObject {
     private var isDecodingFrame = false
     private var refreshCooldownTask: Task<Void, Never>?
     private let refreshCooldownSeconds = 5
+    /// 첫 화면에서 고른 저장 맥 이름. 목록에 보이면 우선 선택한다.
+    private let preferredPeerName: String?
+    /// 저장 맥이 보이면 코드 없이 바로 연결을 시도한다.
+    private let autoConnectTrusted: Bool
+    private var didAutoConnect = false
 
-    init(settings: ToolSettings = ToolSettings()) {
+    init(
+        settings: ToolSettings = ToolSettings(),
+        preferredPeerName: String? = nil,
+        autoConnectTrusted: Bool = false
+    ) {
         self.settings = settings
+        self.preferredPeerName = preferredPeerName
+        self.autoConnectTrusted = autoConnectTrusted
     }
 
     var selectedMacIsTrusted: Bool {
@@ -403,10 +414,20 @@ final class MacLinkModel: ObservableObject {
             self.selectedID = nil
         }
         if selectedID == nil {
-            selectedID = found.first(where: \.isTrusted)?.id ?? (found.count == 1 ? found[0].id : nil)
+            if let preferredPeerName,
+               let preferred = found.first(where: { $0.name == preferredPeerName && $0.isTrusted }) {
+                selectedID = preferred.id
+            } else {
+                selectedID = found.first(where: \.isTrusted)?.id ?? (found.count == 1 ? found[0].id : nil)
+            }
         }
         guard !isConnected, channel == nil else { return }
         status = found.isEmpty ? "주변의 맥을 찾는 중" : "맥을 고르고 연결하세요."
+        if autoConnectTrusted, !didAutoConnect, let mac = selectedMac, mac.isTrusted {
+            didAutoConnect = true
+            status = "\(mac.name)에 연결하는 중"
+            connect()
+        }
     }
 
     private var selectedMac: NearbyMac? {

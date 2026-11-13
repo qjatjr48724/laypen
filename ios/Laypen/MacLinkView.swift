@@ -13,9 +13,19 @@ struct MacLinkView: View {
     @State private var bannerTask: Task<Void, Never>?
     @State private var didShowConnectBanner = false
 
-    init(settings: Binding<ToolSettings>) {
+    init(
+        settings: Binding<ToolSettings>,
+        preferredPeerName: String? = nil,
+        autoConnectTrusted: Bool = false
+    ) {
         _settings = settings
-        _model = StateObject(wrappedValue: MacLinkModel(settings: settings.wrappedValue))
+        _model = StateObject(
+            wrappedValue: MacLinkModel(
+                settings: settings.wrappedValue,
+                preferredPeerName: preferredPeerName,
+                autoConnectTrusted: autoConnectTrusted
+            )
+        )
     }
 
     var body: some View {

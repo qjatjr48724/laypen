@@ -2,7 +2,7 @@ import SwiftUI
 
 /// 좌/우 가장자리에 붙인 채 Y만 이동.
 /// 가로 위치는 바깥쪽 변 기준이라 메뉴가 커져도 접기/ON 버튼이 옆으로 밀리지 않는다.
-/// Spacer·측정용 뷰는 히트하지 않아서, 빈 화면 손가락 터치가 아래 캔버스로 간다.
+/// 메뉴가 커져도 위·가로로 밀리지 않게, 위에서부터 배치하고 남는 아래만 비운다.
 struct EdgeSnappingDraggable<Content: View>: View {
     @ViewBuilder var content: (_ maxHeight: CGFloat) -> Content
 
@@ -22,9 +22,8 @@ struct EdgeSnappingDraggable<Content: View>: View {
         let usable = usableRect()
         let resolvedY = clampedY(y ?? usable.minY + 48, usable: usable)
         let topPad = max(0, resolvedY)
-        let bottomPad = max(0, usable.maxY - resolvedY - contentSize.height)
 
-        ZStack {
+        ZStack(alignment: .topLeading) {
             GeometryReader { geo in
                 Color.clear
                     .onAppear {
@@ -34,37 +33,45 @@ struct EdgeSnappingDraggable<Content: View>: View {
                     }
                     .onChange(of: geo.size) { _, newSize in
                         containerSize = newSize
-                        y = clampedY(y ?? resolvedY, usable: usableRect())
+                        reclampY()
                     }
                     .onChange(of: geo.safeAreaInsets) { _, newInsets in
                         safeInsets = newInsets
-                        y = clampedY(y ?? resolvedY, usable: usableRect())
+                        reclampY()
                     }
             }
             .allowsHitTesting(false)
 
             VStack(spacing: 0) {
-                Spacer()
+                Color.clear
                     .frame(height: topPad)
                     .allowsHitTesting(false)
 
                 HStack(spacing: 0) {
                     if dockedLeading {
-                        Color.clear.frame(width: usable.minX).allowsHitTesting(false)
+                        Color.clear
+                            .frame(width: usable.minX)
+                            .allowsHitTesting(false)
                         toolbar(usableHeight: usable.height, resolvedY: resolvedY)
-                        Spacer(minLength: 0).allowsHitTesting(false)
+                        Spacer(minLength: 0)
+                            .allowsHitTesting(false)
                     } else {
-                        Spacer(minLength: 0).allowsHitTesting(false)
+                        Spacer(minLength: 0)
+                            .allowsHitTesting(false)
                         toolbar(usableHeight: usable.height, resolvedY: resolvedY)
-                        Color.clear.frame(width: max(0, containerSize.width - usable.maxX)).allowsHitTesting(false)
+                        Color.clear
+                            .frame(width: max(0, containerSize.width - usable.maxX))
+                            .allowsHitTesting(false)
                     }
                 }
                 .animation(edgeAnimation, value: dockedLeading)
+                .animation(nil, value: contentSize)
 
-                Spacer()
-                    .frame(height: bottomPad)
+                // 고정 높이 bottomPad 대신 유동 Spacer — 메뉴가 커져도 전체를 가운데로 밀어 올리지 않는다.
+                Spacer(minLength: 0)
                     .allowsHitTesting(false)
             }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .coordinateSpace(name: "edgeDock")
@@ -83,6 +90,8 @@ struct EdgeSnappingDraggable<Content: View>: View {
                             transaction.disablesAnimations = true
                             withTransaction(transaction) {
                                 contentSize = newSize
+                                // 높이만 커질 때는 가능하면 위(y)를 유지하고, 아래로 넘칠 때만 올린다.
+                                reclampY()
                             }
                         }
                 }
@@ -118,6 +127,11 @@ struct EdgeSnappingDraggable<Content: View>: View {
             )
     }
 
+    private func reclampY() {
+        guard let current = y else { return }
+        y = clampedY(current, usable: usableRect())
+    }
+
     /// safe area 레이아웃 + margin 안쪽만 사용 (상단 상태바 아래, 하단 멀티태스킹 그립 위).
     private func usableRect() -> CGRect {
         let minX = safeInsets.leading + margin
@@ -132,9 +146,10 @@ struct EdgeSnappingDraggable<Content: View>: View {
         )
     }
 
+    /// 위쪽 y를 유지하되, 아래를 벗어나면 그때만 올린다. 화면 밖(위)으로는 나가지 않는다.
     private func clampedY(_ value: CGFloat, usable: CGRect) -> CGFloat {
-        let height = min(contentSize.height, max(1, usable.height))
-        let maxY = usable.maxY - height
-        return min(max(value, usable.minY), max(usable.minY, maxY))
+        let height = min(max(contentSize.height, 1), max(usable.height, 1))
+        let maxY = max(usable.minY, usable.maxY - height)
+        return min(max(value, usable.minY), maxY)
     }
 }

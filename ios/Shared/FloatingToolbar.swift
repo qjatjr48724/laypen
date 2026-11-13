@@ -19,6 +19,8 @@ struct FloatingToolbar: View {
     var onSavePhoto: () -> Void
     var onExportShare: () -> Void
     var onConnectMac: (() -> Void)? = nil
+    /// 로컬 필기 화면에서 첫 화면으로 돌아갈 때.
+    var onGoHome: (() -> Void)? = nil
     var showsMacScreen: Binding<Bool>? = nil
     /// 맥 화면 위 필기·상자를 지우지 않고 잠깐 숨긴다. nil이면 버튼을 그리지 않는다.
     var showsMacInk: Binding<Bool>? = nil
@@ -525,6 +527,23 @@ struct FloatingToolbar: View {
             if let onConnectMac {
                 Button(action: onConnectMac) {
                     Label("맥에 연결", systemImage: "link")
+                        .font(.caption2.weight(.semibold))
+                        .lineLimit(1)
+                        .minimumScaleFactor(0.8)
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 8)
+                        .padding(.horizontal, 4)
+                        .background(
+                            RoundedRectangle(cornerRadius: 8, style: .continuous)
+                                .fill(Color.primary.opacity(0.06))
+                        )
+                }
+                .buttonStyle(.plain)
+            }
+
+            if let onGoHome {
+                Button(action: onGoHome) {
+                    Label("첫 화면", systemImage: "house")
                         .font(.caption2.weight(.semibold))
                         .lineLimit(1)
                         .minimumScaleFactor(0.8)

@@ -23,6 +23,13 @@ final class SessionStore {
         return UIImage(data: data)
     }
 
+    func clearBackground() {
+        if let url = AppGroup.containerURL?.appendingPathComponent(backgroundFileName) {
+            try? FileManager.default.removeItem(at: url)
+        }
+        saveMetadata(SessionMetadata(updatedAt: Date(), hasBackgroundImage: false))
+    }
+
     func saveMetadata(_ metadata: SessionMetadata) {
         guard let url = AppGroup.containerURL?.appendingPathComponent(AppGroup.sessionFileName),
               let data = try? JSONEncoder().encode(metadata) else { return }

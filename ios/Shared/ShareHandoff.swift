@@ -23,6 +23,10 @@ enum ShareHandoff {
         }
     }
 
+    static var hasPendingImage: Bool {
+        loadPendingImage() != nil
+    }
+
     static func loadPendingImage() -> UIImage? {
         if let image = BackgroundSourceLoader.loadPendingShareImage() {
             return image

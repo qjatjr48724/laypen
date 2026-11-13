@@ -36,14 +36,18 @@ final class DrawingSessionModel: ObservableObject {
         settings.makeTool(for: settings.selectedTool)
     }
 
-    func bootstrap() {
+    /// 설정·세션을 불러온다. 공유로 넘어온 이미지가 있으면 true.
+    @discardableResult
+    func bootstrap() -> Bool {
         settings = toolSettingsStore.load()
         strokeStore.loadFromDisk()
         drawing = strokeStore.drawing
         shapes = shapeStore.load()
-        if !consumePendingShareIfNeeded() {
-            backgroundImage = sessionStore.loadBackground()
+        if consumePendingShareIfNeeded() {
+            return true
         }
+        backgroundImage = sessionStore.loadBackground()
+        return false
     }
 
     /// 공유 확장에서 넘긴 이미지를 불러와 배경으로 설정. 성공 시 true.
@@ -60,6 +64,30 @@ final class DrawingSessionModel: ObservableObject {
         backgroundImage = image
         sessionStore.saveBackground(image)
         viewport.reset()
+    }
+
+    /// 첫 화면에서 빈 흰 캔버스를 연다.
+    func startBlankCanvas() {
+        drawing = PKDrawing()
+        shapes = []
+        selectedShapeID = nil
+        backgroundImage = nil
+        sessionStore.clearBackground()
+        viewport.reset()
+        isMenuOpen = false
+        isPlacingWhiteRect = false
+        persist()
+    }
+
+    /// 첫 화면에서 고른 사진 위에 필기한다.
+    func startWithPhoto(_ image: UIImage) {
+        drawing = PKDrawing()
+        shapes = []
+        selectedShapeID = nil
+        setBackground(image)
+        isMenuOpen = false
+        isPlacingWhiteRect = false
+        persist()
     }
 
     /// 창 크기 변경: 실시간으로는 부드럽게 스케일하고, 손을 떼면 좌표를 확정한다.
