@@ -8,6 +8,8 @@ struct MacLinkView: View {
     @StateObject private var model: MacLinkModel
     @State private var isMenuOpen = false
     @State private var photoItem: PhotosPickerItem?
+    @State private var bannerText: String?
+    @State private var bannerTask: Task<Void, Never>?
 
     init(settings: Binding<ToolSettings>) {
         _settings = settings
@@ -63,9 +65,26 @@ struct MacLinkView: View {
 
     private var pairing: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(model.status)
-                .font(.subheadline)
-                .foregroundStyle(.secondary)
+            HStack(alignment: .center, spacing: 12) {
+                Text(model.status)
+                    .font(.subheadline)
+                    .foregroundStyle(.secondary)
+                Spacer(minLength: 0)
+                Button {
+                    model.refreshNearby()
+                } label: {
+                    if model.refreshCooldownRemaining > 0 {
+                        Text("\(model.refreshCooldownRemaining)초")
+                            .font(.subheadline.monospacedDigit().weight(.semibold))
+                            .frame(minWidth: 36)
+                    } else {
+                        Label("새로고침", systemImage: "arrow.clockwise")
+                            .font(.subheadline.weight(.semibold))
+                    }
+                }
+                .buttonStyle(.bordered)
+                .disabled(model.refreshCooldownRemaining > 0)
+            }
             if model.nearby.isEmpty {
                 ProgressView()
                     .frame(maxWidth: .infinity, alignment: .center)
@@ -152,8 +171,8 @@ struct MacLinkView: View {
                     availableHeight: maxHeight
                 )
             }
-            if model.controlsMac {
-                Text("펜을 가볍게 대면 커서만 움직이고, 더 세게 누르면 드래그됩니다. 두 손가락은 스크롤")
+            if let bannerText {
+                Text(bannerText)
                     .font(.subheadline.weight(.semibold))
                     .padding(.horizontal, 12)
                     .padding(.vertical, 8)
@@ -161,36 +180,16 @@ struct MacLinkView: View {
                     .padding(.top, 12)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .allowsHitTesting(false)
-            } else if model.settings.inputMode == .penAndHand {
-                Text("펜으로 필기하고, 손가락으로 맥을 조작합니다. 두 손가락은 스크롤")
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .padding(.top, 12)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .allowsHitTesting(false)
-            } else if model.isPlacingWhiteRect {
-                Text("드래그로 상자 크기 지정")
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .padding(.top, 12)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .allowsHitTesting(false)
-            } else if model.settings.selectedTool == .selection {
-                Text("드래그로 필기를 선택하고, 선택한 부분을 끌어서 옮깁니다")
-                    .font(.subheadline.weight(.semibold))
-                    .padding(.horizontal, 12)
-                    .padding(.vertical, 8)
-                    .background(.ultraThinMaterial, in: Capsule())
-                    .padding(.top, 12)
-                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
-                    .allowsHitTesting(false)
+                    .transition(.opacity)
             }
         }
         .background(Color.black)
+        .animation(.easeInOut(duration: 0.2), value: bannerText)
+        .onAppear { showConnectedBannerIfNeeded() }
+        .onChange(of: model.controlsMac) { _, _ in showConnectedBannerIfNeeded() }
+        .onChange(of: model.settings.inputMode) { _, _ in showConnectedBannerIfNeeded() }
+        .onChange(of: model.isPlacingWhiteRect) { _, _ in showConnectedBannerIfNeeded() }
+        .onChange(of: model.settings.selectedTool) { _, _ in showConnectedBannerIfNeeded() }
         .confirmationDialog("필기와 도형을 모두 삭제할까요?", isPresented: $model.showClearConfirm, titleVisibility: .visible) {
             Button("전체 삭제", role: .destructive) {
                 model.clearAll()
@@ -202,6 +201,40 @@ struct MacLinkView: View {
                 model.clearInk()
             }
             Button("취소", role: .cancel) {}
+        }
+    }
+
+    private var connectedBannerMessage: String? {
+        if model.controlsMac {
+            return "펜을 가볍게 대면 커서만 움직이고, 더 세게 누르면 드래그됩니다. 두 손가락은 스크롤"
+        }
+        if model.settings.inputMode == .penAndHand {
+            return "펜으로 필기하고, 손가락으로 맥을 조작합니다. 두 손가락은 스크롤"
+        }
+        if model.isPlacingWhiteRect {
+            return "드래그로 상자 크기 지정"
+        }
+        if model.settings.selectedTool == .selection {
+            return "드래그로 필기를 선택하고, 선택한 부분을 끌어서 옮깁니다"
+        }
+        return nil
+    }
+
+    /// 모드가 바뀔 때 안내를 잠깐 보여 주고 사라지게 한다.
+    private func showConnectedBannerIfNeeded() {
+        guard let message = connectedBannerMessage else {
+            bannerTask?.cancel()
+            bannerText = nil
+            return
+        }
+        bannerTask?.cancel()
+        bannerText = message
+        bannerTask = Task { @MainActor in
+            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            guard !Task.isCancelled else { return }
+            if bannerText == message {
+                bannerText = nil
+            }
         }
     }
 }

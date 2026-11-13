@@ -39,6 +39,8 @@ final class MacLinkModel: ObservableObject {
     @Published var isPlacingWhiteRect = false
     /// 켜면 아이패드 터치가 맥의 클릭·드래그·스크롤이 된다.
     @Published var controlsMac = false
+    /// 새로고침 쿨타임 남은 초. 0이면 다시 누를 수 있다.
+    @Published private(set) var refreshCooldownRemaining = 0
 
     private(set) var image: UIImage?
     private(set) var ink = LinkInk()
@@ -54,6 +56,8 @@ final class MacLinkModel: ObservableObject {
     private let frameDecoder = LinkFrameDecoder()
     private var pendingFrames: [Data] = []
     private var isDecodingFrame = false
+    private var refreshCooldownTask: Task<Void, Never>?
+    private let refreshCooldownSeconds = 5
 
     init(settings: ToolSettings = ToolSettings()) {
         self.settings = settings
@@ -98,6 +102,32 @@ final class MacLinkModel: ObservableObject {
         }
         browser.start(queue: queue)
         self.browser = browser
+    }
+
+    /// 주변 맥 목록을 비우고 Bonjour 검색을 다시 시작한다. 5초 동안은 다시 누를 수 없다.
+    func refreshNearby() {
+        guard !isConnected, refreshCooldownRemaining == 0 else { return }
+        browser?.cancel()
+        browser = nil
+        nearby = []
+        selectedID = nil
+        status = "주변의 맥을 찾는 중"
+        start()
+        beginRefreshCooldown()
+    }
+
+    private func beginRefreshCooldown() {
+        refreshCooldownTask?.cancel()
+        refreshCooldownRemaining = refreshCooldownSeconds
+        refreshCooldownTask = Task { @MainActor [weak self] in
+            guard let self else { return }
+            for remaining in stride(from: self.refreshCooldownSeconds, through: 1, by: -1) {
+                self.refreshCooldownRemaining = remaining
+                try? await Task.sleep(nanoseconds: 1_000_000_000)
+                if Task.isCancelled { return }
+            }
+            self.refreshCooldownRemaining = 0
+        }
     }
 
     func setCode(_ raw: String) {
