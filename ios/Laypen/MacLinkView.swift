@@ -9,7 +9,9 @@ struct MacLinkView: View {
     @State private var isMenuOpen = false
     @State private var photoItem: PhotosPickerItem?
     @State private var bannerText: String?
+    @State private var bannerOpacity: Double = 0
     @State private var bannerTask: Task<Void, Never>?
+    @State private var didShowConnectBanner = false
 
     init(settings: Binding<ToolSettings>) {
         _settings = settings
@@ -45,6 +47,16 @@ struct MacLinkView: View {
         }
         .onChange(of: model.showsMacInk) { _, _ in
             model.sendInkVisibility()
+        }
+        .onChange(of: model.isConnected) { _, connected in
+            if connected {
+                showConnectBannerOnce()
+            } else {
+                bannerTask?.cancel()
+                bannerText = nil
+                bannerOpacity = 0
+                didShowConnectBanner = false
+            }
         }
         .onChange(of: model.settings.selectedTool) { _, tool in
             guard tool == .selection else { return }
@@ -180,16 +192,10 @@ struct MacLinkView: View {
                     .padding(.top, 12)
                     .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
                     .allowsHitTesting(false)
-                    .transition(.opacity)
+                    .opacity(bannerOpacity)
             }
         }
         .background(Color.black)
-        .animation(.easeInOut(duration: 0.2), value: bannerText)
-        .onAppear { showConnectedBannerIfNeeded() }
-        .onChange(of: model.controlsMac) { _, _ in showConnectedBannerIfNeeded() }
-        .onChange(of: model.settings.inputMode) { _, _ in showConnectedBannerIfNeeded() }
-        .onChange(of: model.isPlacingWhiteRect) { _, _ in showConnectedBannerIfNeeded() }
-        .onChange(of: model.settings.selectedTool) { _, _ in showConnectedBannerIfNeeded() }
         .confirmationDialog("필기와 도형을 모두 삭제할까요?", isPresented: $model.showClearConfirm, titleVisibility: .visible) {
             Button("전체 삭제", role: .destructive) {
                 model.clearAll()
@@ -204,37 +210,34 @@ struct MacLinkView: View {
         }
     }
 
-    private var connectedBannerMessage: String? {
-        if model.controlsMac {
-            return "펜을 가볍게 대면 커서만 움직이고, 더 세게 누르면 드래그됩니다. 두 손가락은 스크롤"
-        }
-        if model.settings.inputMode == .penAndHand {
-            return "펜으로 필기하고, 손가락으로 맥을 조작합니다. 두 손가락은 스크롤"
-        }
-        if model.isPlacingWhiteRect {
-            return "드래그로 상자 크기 지정"
-        }
-        if model.settings.selectedTool == .selection {
-            return "드래그로 필기를 선택하고, 선택한 부분을 끌어서 옮깁니다"
-        }
-        return nil
-    }
-
-    /// 모드가 바뀔 때 안내를 잠깐 보여 주고 사라지게 한다.
-    private func showConnectedBannerIfNeeded() {
-        guard let message = connectedBannerMessage else {
-            bannerTask?.cancel()
-            bannerText = nil
-            return
+    /// 연결 직후 한 번만 3초 안내를 보여 주고, 천천히 사라지게 한다.
+    private func showConnectBannerOnce() {
+        guard !didShowConnectBanner else { return }
+        didShowConnectBanner = true
+        let message: String
+        switch model.settings.inputMode {
+        case .penAndHand:
+            message = "펜으로 필기하고, 손가락으로 맥을 조작합니다. 두 손가락은 스크롤"
+        case .pen:
+            message = "펜으로 필기합니다. 맥 조작은 마우스 버튼을 켜세요"
+        case .hand:
+            message = "손으로 필기합니다. 맥 조작은 마우스 버튼을 켜세요"
         }
         bannerTask?.cancel()
         bannerText = message
+        bannerOpacity = 0
+        withAnimation(.easeOut(duration: 0.25)) {
+            bannerOpacity = 1
+        }
         bannerTask = Task { @MainActor in
-            try? await Task.sleep(nanoseconds: 2_500_000_000)
+            try? await Task.sleep(nanoseconds: 3_000_000_000)
             guard !Task.isCancelled else { return }
-            if bannerText == message {
-                bannerText = nil
+            withAnimation(.easeOut(duration: 0.7)) {
+                bannerOpacity = 0
             }
+            try? await Task.sleep(nanoseconds: 700_000_000)
+            guard !Task.isCancelled else { return }
+            bannerText = nil
         }
     }
 }
@@ -324,6 +327,10 @@ final class MacLinkCanvasView: UIView {
         contentMode = .redraw
         isOpaque = true
         let hover = UIHoverGestureRecognizer(target: self, action: #selector(handleHover(_:)))
+        // 호버가 손가락 터치를 취소·지연시키지 않게 한다.
+        hover.cancelsTouchesInView = false
+        hover.delaysTouchesBegan = false
+        hover.delaysTouchesEnded = false
         addGestureRecognizer(hover)
     }
 
@@ -375,7 +382,9 @@ final class MacLinkCanvasView: UIView {
     }
 
     private func drawControlCursor() {
-        guard let model, model.controlsMac, let center = controlCursor else { return }
+        guard let model,
+              model.controlsMac || model.settings.inputMode == .penAndHand,
+              let center = controlCursor else { return }
         let dragging = pointerIsDown
         let side: CGFloat = dragging ? 18 : 14
         let rect = CGRect(x: center.x - side / 2, y: center.y - side / 2, width: side, height: side)
@@ -488,7 +497,7 @@ final class MacLinkCanvasView: UIView {
         append(touches, event: event, phase: .ended)
     }
 
-    /// 손+펜: 펜은 필기, 손가락은 맥 조작.
+    /// 손+펜: 펜은 필기, 손가락(펜이 아닌 접촉)은 맥 조작.
     private func routePenAndHand(
         _ touches: Set<UITouch>,
         event: UIEvent?,
@@ -499,7 +508,8 @@ final class MacLinkCanvasView: UIView {
               model.settings.selectedTool != .selection,
               !model.isPlacingWhiteRect,
               model.settings.isDrawingEnabled else { return false }
-        let fingers = Set(touches.filter { $0.type == .direct })
+        // .direct만 보면 일부 기기/상황에서 손가락이 빠져 조작이 死는다. 펜만 제외한다.
+        let fingers = Set(touches.filter { $0.type != .pencil })
         let pencils = Set(touches.filter { $0.type == .pencil })
         if !fingers.isEmpty {
             trackControl(fingers, phase: phase)

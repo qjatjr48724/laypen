@@ -1,116 +1,181 @@
 # Laypen
 
-아이패드에서 필기하는 앱. 스크린샷 위에 그리거나, 맥 화면을 아이패드로 가져와 그 위에 그린 선과 상자를 맥에서도 같이 본다.
+아이패드로 필기하는 앱.  
+스크린샷 위에 그리거나, 맥 화면을 가져와 그 위에 그리고, 아이패드로 맥을 조작할 수 있다.
 
-로그인은 없다. 그림과 연결 정보는 각 기기에만 남고, 두 앱이 가까이에서 직접 주고받는다.
+서버·로그인 없음. 같은 Wi-Fi이거나 가까이 있으면 두 기기가 직접 연결한다. USB는 충전만 한다.
 
-## 📸 스크린샷 필기
+## 한눈에 보기
 
-다른 앱 위에 항상 떠 있는 필기 창은 iPadOS에서 만들 수 없다. 스크린샷을 Laypen으로 가져와 그 위에 그린다.
+| 하고 싶은 일 | Laypen에서 |
+| --- | --- |
+| 스크린샷 위에 필기 | 공유 → Laypen, 또는 앱에서 사진 열기 |
+| 맥 화면 위에 필기 | 맥·아이패드에서 Laypen 실행 → **맥에 연결** |
+| 아이패드로 맥 클릭·스크롤 | 연결 후 마우스 버튼, 또는 **손+펜** 모드 |
+| 필기만 잠깐 숨기기 | 눈 버튼 (맥·아이패드 동시) |
+| 필기 일부 옮기기 | **선택** 도구 |
 
-1. 다른 앱에서 스크린샷을 찍는다.
-2. 공유에서 **Laypen**을 고른다.
-3. Apple Pencil로 필기한다.
+---
 
-앱을 직접 켜서 앨범의 스크린샷을 열 수도 있다. 작업은 기기에 남고, 다음에 켜면 이어서 열린다.
+## 기능
 
-## 🖥️ 맥 화면 위에 필기
+각 항목은 **기능 → 설명 → 관련 코드** 순이다.
 
-맥과 아이패드에서 Laypen을 켜 둔다. 같은 Wi-Fi이거나 서로 가까이 있으면 아이패드가 맥을 찾는다.
+### 스크린샷 필기
 
-1. 아이패드에서 **맥에 연결**을 연다.
-2. 목록에서 맥을 고르고, 맥 화면에 뜬 네 자리 코드를 입력한다.
-3. 아이패드에 맥 화면이 보이고, 그 위에 그린 내용이 맥에도 겹쳐 보인다.
+다른 앱 스크린샷을 Laypen으로 가져와 Pencil로 필기한다. 공유 시트에서 열거나, 앱에서 사진을 고른다. 작업은 기기에 남아 다음에 이어서 연다.
 
-한 번 연결한 맥은 다음부터 코드 없이 다시 붙는다. 아이패드에서 맥 화면만 끄면 회색 캔버스에서 계속 그릴 수 있고, 맥 쪽 필기와 상자는 눈 버튼으로 잠깐 숨길 수 있다. 숨겨도 그림은 그대로 남는다.
+- `ios/LaypenShare/ShareViewController.swift` — `ShareViewController`
+- `ios/Shared/ShareHandoff.swift` — `ShareHandoff`
+- `ios/Shared/DrawingSessionModel.swift` — `DrawingSessionModel`
+- `ios/Shared/DrawingCanvasView.swift` — `AnnotatedCanvas`, `DrawingCanvasView`
+- `ios/Shared/SessionStore.swift` — `SessionStore`
 
-맥 창의 닫기 버튼은 창만 닫는다. 앱까지 끄려면 **완전 종료**를 누른다.
+### 근처 맥 찾기 · 코드 연결
 
-## ✏️ 필기
+아이패드가 Bonjour로 주변 맥을 찾는다. 맥에 뜬 네 자리 코드를 넣으면 연결된다. **새로고침**으로 목록을 다시 찾을 수 있고, 5초 쿨타임이 있다.
 
-- 검정 펜, 컬러 펜, 형광펜, 지우개. 도구마다 색과 굵기를 기억한다.
-- 펜을 잠시 누르면 그 획이 직선으로 펴진다.
-- 흰색 상자를 올려 두고, 옮기거나 크기를 바꿀 수 있다.
-- 지우개를 한 번 더 누르면 필기만 지우고 상자는 남긴다. 휴지통은 필기와 상자를 같이 지운다. 둘 다 한 번 묻는다.
-- 실행 취소와 다시 실행.
-- 손가락과 Pencil을 나눠 쓸 수 있다.
+- `ios/Laypen/MacLinkView.swift` — `MacLinkView` (페어링 UI)
+- `ios/Laypen/MacLinkModel.swift` — `MacLinkModel.start()`, `refreshNearby()`
+- `ios/Mac/MacHostView.swift` — `MacHostView` (코드 표시)
+- `ios/Mac/MacLinkHost.swift` — `MacLinkHost.start()`, `beginSession()`
+- `ios/Link/LinkMessages.swift` — `LinkService`, `LinkHello`, `LinkAccept`
 
-맥에 연결한 화면에는 사진 고르기, 저장, 보내기가 없다. 직선으로 펴기와 상자는 그대로 있다.
+### 한 번 연결한 맥은 코드 없이 다시 연결
 
-## ✨ 강점과 구현
+연결에 성공하면 토큰을 기기에 저장한다. 다음부터는 **저장됨**으로 코드 없이 붙는다. 맞지 않으면 **코드 입력**으로 다시 확인한다.
 
-### 서버 없이 두 기기가 붙는다
+- `ios/Link/LinkTrustStore.swift` — `LinkTrustStore`
+- `ios/Laypen/MacLinkModel.swift` — `NearbyMac`, `connect()`, `requestCodeEntry()`
+- `ios/Mac/MacLinkHost.swift` — hello / accept / reject 처리
 
-중간에 서버를 두지 않는다. 같은 네트워크에 있거나 서로 가까이 있으면, 화면과 필기가 그 연결로만 오간다.
+### 맥 화면을 아이패드로 보기
 
-맥은 `Network` 프레임워크로 Bonjour 서비스 `_laypen-link._tcp`를 연다. 아이패드의 `NWBrowser`가 그 이름을 찾고, `NWConnection`으로 TCP를 맺는다. `includePeerToPeer`로 기기끼리도 찾을 수 있다. 메시지는 1바이트 종류, 4바이트 길이, 본문으로 나눈다. 화면 JPEG는 대기열에 최신 한 장만 남기고, 필기 메시지가 오래된 화면 뒤에 밀리지 않게 한다.
+맥 주 화면을 캡처해 아이패드로 보낸다. H.264로 보내고, 안 되면 JPEG로 넘긴다. 필기 오버레이 창만 캡처에서 빼고, 코드 창은 아이패드에도 보인다. 화면 보호기가 끝나면 캡처를 다시 연다.
 
-처음에는 맥이 보여 주는 네 자리 코드로 확인한다. 맥이 준 토큰은 아이패드 `UserDefaults`에 남고, 다음 hello에 그 토큰이 있으면 코드를 다시 묻지 않는다. Bonjour에 기기 번호가 없으면, 목록에 보인 맥 이름으로 같은 기록을 찾는다.
+- `ios/Mac/ScreenSender.swift` — `ScreenSender.start()`, `openEncoder()`
+- `ios/Link/LinkFrameDecoder.swift` — `LinkFrameDecoder`, `LinkVideoFrame`
+- `ios/Link/LinkChannel.swift` — `LinkChannel` (프레임 순서 전송)
+- `ios/Mac/MacLinkHost.swift` — `displayResumed()`, `startCapture()`
 
-- `ios/Link/LinkMessages.swift`
-- `ios/Link/LinkChannel.swift`
-- `ios/Link/LinkTrustStore.swift`
-- `ios/Laypen/MacLinkModel.swift`
-- `ios/Mac/MacLinkHost.swift`
+### 맥 화면 위에 필기·상자 겹치기
 
-### 필기가 맥 조작을 가리지 않는다
+아이패드에서 그린 획과 흰색 상자가 맥 화면 위 투명 패널에 같이 보인다. 클릭은 아래 앱으로 통과한다.
 
-맥 화면 위 필기는 투명한 `NSPanel`이다. 테두리가 없고, 클릭은 `ignoresMouseEvents`로 아래 앱에 넘어간다. 모든 Space에도 올라간다. `sharingType`을 `none`으로 두어, 화면을 찍을 때 이 창은 빠진다.
+- `ios/Mac/OverlayPanel.swift` — `OverlayPanel`, `OverlayCanvasView`
+- `ios/Laypen/MacLinkModel.swift` — `addStroke()`, `setBoxes()`
+- `ios/Link/LinkMessages.swift` — `StrokeSample`, `LinkBox`, `LinkInk`
 
-화면은 `ScreenCaptureKit`이 주 디스플레이를 약 8fps, 긴 변 1440px, JPEG로 보낸다. 캡처에서 Laypen 맥 앱을 빼 두어, 방금 그린 선이 다음 화면 이미지에 구워지지 않는다. 아이패드와 맥이 각자 같은 필기를 그린다.
+### 아이패드로 맥 조작
 
-- `ios/Mac/OverlayPanel.swift`
-- `ios/Mac/ScreenSender.swift`
+마우스 버튼을 켜면 터치가 맥의 클릭·드래그·스크롤이 된다. **손+펜** 모드에서는 마우스 버튼 없이도 손가락으로 바로 조작한다. 한 손가락은 클릭·드래그, 두 손가락은 스크롤(손가락을 위로 쓸면 아래 내용이 보인다). 손쉬운 사용 권한이 필요하다. 마우스 모드에서 Pencil은 가볍게 대면 커서만, 세게 누르면 드래그.
 
-### 아이패드와 맥이 같은 자리를 가리킨다
+- `ios/Laypen/MacLinkModel.swift` — `setControlsMac()`, `sendPointer()`
+- `ios/Laypen/MacLinkView.swift` — `MacLinkCanvasView.trackControl()`, `updatePencilPressure()`, `routePenAndHand()`
+- `ios/Mac/MacPointer.swift` — `MacPointer.apply()`, `scroll()`
+- `ios/Link/LinkMessages.swift` — `PointerEvent`
 
-점과 상자는 픽셀이 아니라, 화면에 맞춘 직사각형 안의 0–1 좌표다. 아이패드 창 크기가 바뀌어도 맥 전체 화면과 같은 비율 위치를 가리킨다. 굵기도 그 직사각형 높이의 비율이라, 양쪽에서 펜 굵기 느낌이 비슷하게 남는다.
+### 입력 모드 (펜 / 손+펜 / 손)
 
-직선을 보낼 때는 점을 `xs`, `ys` 두 실수 배열로 나눈다. `CGPoint`를 그대로 JSON으로 바꾸면 기기마다 형식이 달라질 수 있어, 좌표를 따로 보낸다.
+- **펜** (기본) — 펜만 필기. 맥 조작은 마우스 버튼.
+- **손+펜** — 펜은 필기, 손가락은 바로 맥 조작(메인 캔버스에서는 한 손가락 스크롤).
+- **손** — 손으로 필기. 맥 조작은 마우스 버튼.
 
-맥 연결 화면의 직선은 점 목록을 직접 잇는다. 펜을 0.5초 멈추면 그 획의 시작과 끝을 잇고, 굵기를 한 번 0.82배로 줄인 다음 `replaceStroke`로 맥에 알린다. 지우개에는 이 동작을 붙이지 않는다.
+- `ios/Shared/ToolSettings.swift` — `DrawingInputMode`, `ToolSettings`
+- `ios/Shared/FloatingToolbar.swift` — 입력 모드 버튼
+- `ios/Laypen/MacLinkView.swift` — `routePenAndHand()`
+- `ios/Shared/DrawingCanvasView.swift` — `ensureScrollTouchCount()`
+- `ios/Shared/EdgeSnappingDraggable.swift` — 툴바만 히트, 빈 화면 터치는 캔버스로 통과
 
-- `ios/Laypen/MacLinkView.swift`
-- `ios/Laypen/MacLinkModel.swift`
-- `ios/Link/LinkMessages.swift`의 `LinkStrokeWire`
+### 필기 도구
 
-### 지운 자리 위에 다시 그릴 수 있다
+검정·컬러·형광·지우개. 색·굵기를 기억한다. 메뉴를 접어도 undo·redo는 보인다. 맥 연결 화면에는 사진 저장·보내기가 없다.
 
-지우개는 선을 다 그린 뒤에 한 겹으로 덮지 않는다. 획이 생긴 순서대로, 펜은 보통 합성으로, 지우개는 `destinationOut`으로 비트맵에만 그린다. 지운 뒤에 그린 선은 남고, 그 자리에도 다시 칠할 수 있다.
+- `ios/Shared/ToolSettings.swift` — `DrawingToolKind`, `ToolSettings`
+- `ios/Shared/ToolSettingsStore.swift` — `ToolSettingsStore`
+- `ios/Shared/FloatingToolbar.swift` — `FloatingToolbar`
 
-이 합성을 투명 창에 바로 하면 지운 자리가 구멍으로 남아, 나중에 그린 선이 그 구멍을 메우지 못한다. 화면 밖 비트맵에 먼저 그린 다음, 완성된 이미지를 창에 올린다. 흰색 상자는 그 이미지보다 먼저 그려, 지우개가 상자는 두고 선만 걷어 낸다.
+### 홀드로 직선 만들기
 
-아이패드의 맥 연결 화면도 같은 순서다. 상자와 떨어진 투명 이미지에 필기를 그린다.
+펜을 잠시 멈추면 그 획이 직선으로 펴진다. 맥 연결 화면에도 같다.
 
-- `ios/Mac/OverlayPanel.swift`
-- `ios/Laypen/MacLinkView.swift`
-- `ios/Link/LinkMessages.swift`의 `LinkInk`
+- `ios/Shared/StrokeStraightener.swift` — `StrokeStraightener`
+- `ios/Shared/DrawingCanvasView.swift` — Coordinator 홀드 스냅
+- `ios/Laypen/MacLinkModel.swift` — `straightenLastStroke()`
+- `ios/Laypen/MacLinkView.swift` — `snapStraight()`
 
-### 맥 쪽 필기를 숨겨도 그림은 남는다
+### 필기 일부 선택·이동
 
-눈 버튼은 패널만 접는다. 아이패드가 `overlayVisible`로 0이나 1만 보내고, 맥은 패널을 `orderOut`하거나 다시 띄운다. 획과 상자는 양쪽에 그대로 있다. 아이패드에서 맥 화면 이미지만 끄면 캡처 대신 회색 캔버스가 보이고, 필기 영역에는 테두리가 남는다.
+선택 도구로 영역을 잡아 획을 옮긴다. 맥 오버레이에도 같이 반영된다.
 
-### 스크린샷 위에서는 PencilKit을 쓴다
+- `ios/Shared/ToolSettings.swift` — `DrawingToolKind.selection`
+- `ios/Laypen/MacLinkView.swift` — `beginInkSelection()`, `finishInkSelection()`, `clearInkSelection()`
+- `ios/Laypen/MacLinkModel.swift` — `replaceInk()`
+- `ios/Mac/OverlayPanel.swift` — `replaceInk()`
+- `ios/Link/LinkMessages.swift` — `LinkMessageKind.replaceInk`, `LinkStroke.intersects()`
 
-스크린샷 위 필기는 `PKCanvasView`다. 공유 확장 `LaypenShare`가 이미지를 받아 App Group `group.com.laypen.app`으로 넘기면, 메인 앱이 그 위에 연다. 펜을 길게 눌러 직선으로 만드는 건 `PKStroke`를 다시 만드는 `StrokeStraightener`가 한다. 도구 색과 굵기는 `tool-settings.json`에 남아, 맥 연결 화면과 메인 캔버스가 같은 설정을 쓴다.
+### 흰색 상자
 
-- `ios/Shared/DrawingCanvasView.swift`
-- `ios/Shared/StrokeStraightener.swift`
-- `ios/Shared/ToolSettingsStore.swift`
-- `ios/LaypenShare/ShareViewController.swift`
+가림용 상자를 올리고, 옮기거나 크기를 바꾼다. 지우개는 상자는 두고 필기만 지운다.
+
+- `ios/Shared/WhiteRectShape.swift` — `WhiteRectShape`
+- `ios/Shared/WhiteboardLayer.swift` — `WhiteboardLayer`
+- `ios/Laypen/MacLinkView.swift` — 상자 배치·편집
+- `ios/Link/LinkMessages.swift` — `LinkBox`
+
+### 지우개 · 전체 삭제
+
+지우개를 한 번 더 누르면 필기만 지운다. 휴지통은 필기+상자를 지운다. 둘 다 확인 후 실행한다. 지운 자리 위에도 다시 그릴 수 있다.
+
+- `ios/Link/LinkMessages.swift` — `LinkInk`
+- `ios/Mac/OverlayPanel.swift` — `OverlayCanvasView` (`destinationOut` 오프스크린)
+- `ios/Laypen/MacLinkModel.swift` — `clearInk()`, `clearAll()`
+- `ios/Shared/FloatingToolbar.swift` — 지우개·휴지통 버튼
+
+### 필기 숨기기 · 맥 화면 끄기
+
+눈 버튼은 필기·상자를 맥과 아이패드에서 같이 가린다. 데이터는 남는다. 맥 화면 끄면 회색 캔버스에서 계속 그린다.
+
+- `ios/Laypen/MacLinkModel.swift` — `showsMacInk`, `showsMacScreen`, `sendInkVisibility()`
+- `ios/Mac/OverlayPanel.swift` — `setContentVisible()`
+- `ios/Laypen/MacLinkView.swift` — `MacLinkCanvasView.draw`
+- `ios/Shared/FloatingToolbar.swift` — 눈·맥 화면 버튼
+
+### 연결 안내 배너
+
+연결 직후 현재 입력 모드 안내를 상단에 3초간 한 번만 보여 주고, 서서히 사라진다.
+
+- `ios/Laypen/MacLinkView.swift` — `showConnectBannerOnce()`
+
+### 좌표를 양쪽에 같게 맞추기
+
+점·상자는 화면 fit 영역 기준 0–1 좌표다. 직선은 `xs`/`ys` 배열로 보내 기기 간 JSON 차이를 피한다.
+
+- `ios/Link/LinkMessages.swift` — `LinkStrokeWire`, `LinkStrokeStyle`
+- `ios/Laypen/MacLinkView.swift` — `normalize`, `map`
+- `ios/Mac/OverlayPanel.swift` — `map`
+
+### 서버 없는 근거리 전송
+
+Bonjour `_laypen-link._tcp` + TCP. 메시지 종류 1바이트 + 길이 4바이트 + 본문. 화면 프레임은 순서를 지키고, 필기·포인터가 앞에 나간다.
+
+- `ios/Link/LinkMessages.swift` — `LinkService`, `LinkCodec`, `LinkFramer`
+- `ios/Link/LinkChannel.swift` — `LinkChannel`
+
+---
 
 ## 프로젝트
 
 | 위치 | 역할 |
 | --- | --- |
 | [`ios/Laypen`](ios/Laypen) | iPad 앱. iOS 17, iPad 전용 |
-| [`ios/LaypenShare`](ios/LaypenShare) | 공유 확장. 스크린샷을 필기 화면으로 넘긴다 |
+| [`ios/LaypenShare`](ios/LaypenShare) | 공유 확장 |
 | [`ios/Mac`](ios/Mac) | Mac 앱 `LaypenMac`. macOS 14 |
-| [`ios/Link`](ios/Link) | 근처 맥 찾기, 연결, 필기 전달 |
+| [`ios/Link`](ios/Link) | 연결, 화면·필기·포인터 프로토콜 |
 | [`ios/Shared`](ios/Shared) | 캔버스, 도구, 저장 |
-| [`docs/`](docs) | 제안서와 범위 |
+| [`docs/`](docs) | 제안서·검증·범위 |
 
-## 🛠️ 실행
+## 실행
 
 ```bash
 cd ios
@@ -118,14 +183,12 @@ xcodegen generate
 open Laypen.xcodeproj
 ```
 
-Xcode에서 서명 팀을 맞춘 다음 스킴을 고른다.
+- **Laypen** — iPad / 시뮬레이터  
+- **LaypenMac** — My Mac  
 
-- **Laypen** — iPad 또는 시뮬레이터
-- **LaypenMac** — My Mac
-
-실기기에서 공유 확장을 쓰려면 App Group `group.com.laypen.app`이 필요하다. 맥 연결에는 양쪽의 로컬 네트워크 권한과, 맥의 화면 기록 권한이 필요하다. 파일을 추가하거나 지우면 `xcodegen generate`를 다시 실행한다.
-
-폴더와 권한은 [`ios/README.md`](ios/README.md)에 더 적어 두었다.
+필요 권한: App Group `group.com.laypen.app`, 로컬 네트워크, 맥 화면 기록·손쉬운 사용.  
+파일을 추가·삭제하면 `xcodegen generate`를 다시 실행한다.  
+자세한 폴더·권한은 [`ios/README.md`](ios/README.md).
 
 ## 문서
 

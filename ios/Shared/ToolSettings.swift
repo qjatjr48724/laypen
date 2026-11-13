@@ -58,7 +58,7 @@ enum DrawingInputMode: String, CaseIterable, Identifiable, Codable {
     var hint: String {
         switch self {
         case .pen: return "펜으로 필기 · 화면 조작은 마우스 버튼"
-        case .penAndHand: return "펜으로 필기 · 손으로 화면 조작"
+        case .penAndHand: return "펜으로 필기 · 손으로 맥 조작"
         case .hand: return "손으로 필기 · 화면 조작은 마우스 버튼"
         }
     }
